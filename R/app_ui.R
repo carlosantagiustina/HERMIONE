@@ -108,8 +108,7 @@ my_theme = fresh::create_theme(
             tags$img(src = 'https://muhai.org/images/banners/muhai.svg',
                      width = "100%",style="border: 15px solid transparent;")
           ),
-          bookmarkButton(label = "Bookmark HERMIONE state")#class = "mx-2"
-        ),
+          bookmarkButton(label = "Bookmark HERMIONE state"),#class = "mx-2"
           # popover(
           #   title = "Bookmark",
           #   content = "This button allows you to bookmark the current state of HERMIONE and its parameters in a single URL. You can copy this URL and paste it later in your browser to reinitialize the dashboard at a specific state",
