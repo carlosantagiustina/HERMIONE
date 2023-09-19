@@ -1,0 +1,27 @@
+Package: Hermione
+Title: MUHAI Inequality Observatory
+Version: 0.0.0.9000
+Authors@Carlo: person('Carlo R. M. A.', 'Santagiustina', email = 'carlo.santagiustina@univiu.org', role = c('cre', 'aut'))
+Authors@Laura: person('Laura', 'Spillner', email = 'lau_spi@uni-bremen.de', role = c('cre', 'aut'))
+Authors@VM: person('MUHAI', 'H2020 EU Porject', email = 'muhain.inequality.observatory@gmail.com', role = c(''))
+Description: Add description here
+License: What license is it under?
+Imports: 
+    bs4Dash (>= 2.0.1),
+    config (>= 0.3.1),
+    echarts4r (>= 0.4.4), 
+    fresh (>= 0.2.0), 
+    golem (>= 0.3.4),
+    shiny (>= 1.7.3),
+    waiter (>= 0.2.5)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    spelling,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Language: en-US
+VignetteBuilder: knitr

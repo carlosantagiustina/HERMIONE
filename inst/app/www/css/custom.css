@@ -1,0 +1,58 @@
+#ip1 {
+    border-radius: 18px;
+    border:solid #ffd100;
+    background: #ffd100;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+}
+
+#ip2 {
+    border-radius: 25px;
+    border: 2px solid #ffd100;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+}
+
+#ip3 {
+    border-radius: 15px 70px 30px 5px;
+    border:solid #ffd100;
+    background:  #ffd100;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+}
+
+#ip4 {
+    border-radius: 15px 50px 30px;
+    border: 2px  #ffd100;
+    padding: 20px;
+    background:  #ffd100;
+    width: 200px;
+    height: 100px;
+}
+
+#iphermione {
+    border-radius: 10px 50px 50px  70px;
+    background:  #ffd100;
+    padding: 20px;
+    width: 110%;
+    opacity: .5;
+}
+
+#ip6 {
+    border-radius: 50%;
+    border: 2px solid  #ffd100;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+}
+
+#ip7 {
+    border-radius: 15px 50px;
+    background:  #ffd100;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+}
