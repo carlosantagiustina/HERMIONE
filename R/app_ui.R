@@ -778,7 +778,6 @@ Additionally, web observatories can be used by researchers, citizens, businesses
   #' @import httr
   #' @import tidytext
   #' @import ggplot2
-  #' @import aRtsy
   #' @importFrom golem add_resource_path activate_js favicon bundle_resources
   #' @noRd
   golem_add_external_resources <- function() {
