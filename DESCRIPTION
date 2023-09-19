@@ -7,14 +7,14 @@ Authors@VM: person('MUHAI', 'H2020 EU Porject', email = 'muhain.inequality.obser
 Description: The HERMIONE shiny dashboard, developed by the MUHAI project, allows you to explore co-occurrence networks, fine-grained entity views, and case studies on inequality perception using online sources, such as Twitter data collected in MUHAI's Observatory Knowledge Graph. With HERMIONE you can: (i) Gain insights into how specific forms of inequality are experienced, perceived, and understood across time and contexts. (ii) Understand reactions and challenges to inequality by individuals, institutions, and organizations. (iii) Access powerful methods for retrieving, filtering, aggregating, and analyzing online debates from different perspectives.
 License: MIT + file LICENSE
 Imports: 
-    bs4Dash (>= 2.0.1),
+    bs4Dash (= 2.0.1),
     config (>= 0.3.1),
-    echarts4r (>= 0.4.4), 
+    echarts4r (= 0.4.4), 
     fresh (>= 0.2.0), 
-    golem (>= 0.3.4),
+    golem (= 0.3.5),
     future (>= 1.30.0),
     promises (>= 1.2.0.1),
-    shiny (>= 1.7.3),
+    shiny (= 1.7.4),
     waiter (>= 0.2.5),
     shinyWidgets (>= 0.7.6),
     shinyjs (>= 2.1.0),
@@ -23,9 +23,9 @@ Imports:
     bslib (>= 0.4.2),
     tidyverse (>= 1.3.2),
     ipc (>= 0.1.4),
-    visNetwork (>= 2.1.2),
-    httr (>= 1.4.5),
-    tidytext (>= 0.4.1),
+    visNetwork (= 2.1.2),
+    httr (= 1.4.5),
+    tidytext (= 0.4.1),
     ggplot2 (>= 3.4.0),
     textyle
 Remotes:
