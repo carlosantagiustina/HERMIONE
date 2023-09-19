@@ -43,7 +43,15 @@ query_and_build_net=function(target_nodes_=100,
   library(igraph)
   library(visNetwork)
 
-  REQUEST= function(QUERY_=QUERY,PREFIX_=PREFIX, ENDPOINT_=ENDPOINT,API_KEY_=API_KEY, START_DATE_=START_DATE, END_DATE_=END_DATE, TIMEOUT_=30, RESOURCE_=RESOURCE,N_THRESHOLD_=N_THRESHOLD,N_LIMIT_=N_LIMIT){
+  REQUEST= function(QUERY_=QUERY,PREFIX_=PREFIX,
+                    ENDPOINT_=ENDPOINT
+                    #,API_KEY_=API_KEY
+                    , START_DATE_=START_DATE,
+                    END_DATE_=END_DATE,
+                    TIMEOUT_=30,
+                    RESOURCE_=RESOURCE,
+                    N_THRESHOLD_=N_THRESHOLD,
+                    N_LIMIT_=N_LIMIT){
     #PASTE PREFIXES AND QUERY
     MY_QUERY=paste0(PREFIX_,QUERY_)
 
@@ -73,10 +81,10 @@ query_and_build_net=function(target_nodes_=100,
     #RUN REQUEST
     REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
                       query=list("query"=MY_QUERY),
-                      add_headers("Accept"= "text/csv",
-                                  "Authorization" = paste('Bearer',
-                                                          API_KEY_,
-                                                          sep=" ")
+                      add_headers("Accept"= "text/csv"
+                                  # ,"Authorization" = paste('Bearer',
+                                  #                         API_KEY_,
+                                  #                         sep=" ")
                       )
     )
 
@@ -252,8 +260,9 @@ ANSWER=REQUEST(QUERY_ = QUERY,
                END_DATE_=END_DATE ,
                N_THRESHOLD_=N_THRESHOLD,
                N_LIMIT_ = N_LIMIT,
-               ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql",
-               API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY"),RESOURCE_=NA)
+               ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql"
+               #,API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY")
+               ,RESOURCE_=NA)
 
 results=build_net(ANSWER_  = ANSWER,target_nodes = target_nodes_,filter = filter_)
 #saveRDS(results,file = paste0("results",Sys.Date(),".RDS"))
