@@ -21,8 +21,6 @@
 #' @import ggplot2
 #' @noRd
 
-#### FORCE LOAD LIBRARY ####
-library(crew)
 #### SERVER PARAMETERS ####
 initial_server_parameters <- list(
   twitter_data_from ="01-01-2020",

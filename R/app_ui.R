@@ -774,7 +774,6 @@ Additionally, web observatories can be used by researchers, citizens, businesses
   #' @import ipc
   #' @import future
   #' @import promises
-  #' @import crew
   #' @import httr
   #' @import tidytext
   #' @import ggplot2
