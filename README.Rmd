@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    toc: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -15,25 +17,47 @@ knitr::opts_chunk$set(
 
 # Hermione
 
+
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of Hermione is to ...
+The HERMIONE shiny dashboard, developed as part of the Social Inequality Observatory of the MUHAI project, allows you to interactively filter and explore co-occurrence entity networks, fine-grained narratives analysis, and case studies on inequality perception using online data from Twitter, collected in MUHAI's Observatory Knowledge Graph. 
+With HERMIONE you can: (i) Gain insights into how specific forms of inequality are perceived, and understood across time and contexts. (ii) Understand reactions and dialectical challenges to inequality by individuals, institutions, and organizations. (iii) Access powerful methods for retrieving, filtering, aggregating, and analyzing online debates about inequality from different perspectives.
+
 
 ## Installation
 
-You can install the development version of Hermione like so:
+You can install the development version of Hermione from GitHub (main branch) as follows:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+library(remotes)
+remotes::install_github("https://github.com/carlosantagiustina/HERMIONE/")
 ```
 
-## Example
+## How to run the Hermione dashboard
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r load, eval = FALSE}
+#Load Hermione library
 library(Hermione)
-## basic example code
+#run Hermione app
+Hermione::run_app()
+#Enjoy!
 ```
+
+# References
+
+```{=latex}
+\begin{itemize}
+    \item Laura Spillner, Carlo R. M. A. Santagiustina, Thomas Mildner, and Robert Porzel (2023). Mapping and Exploring the Dynamics of Inequality Narratives Through Social Media.
+\end{itemize}
+```
+
+# HERMIONE dev team
+
+- (creator & maintainer) Carlo R. M. A. Santagiustina [carlo.santagiustina@univiu.org](mailto:carlo.santagiustina@univiu.org)
+
+- (contributor) Laura Spillner [laura.spillner@uni-bremen.de](mailto:laura.spillner@uni-bremen.de)
+

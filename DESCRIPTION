@@ -1,5 +1,5 @@
 Package: Hermione
-Title: MUHAI Inequality Observatory
+Title: HERMIONE - MUHAI Inequality Observatory
 Version: 0.1.0
 Authors@Carlo: person('Carlo R. M. A.', 'Santagiustina', email = 'carlo.santagiustina@univiu.org', role = c('cre', 'aut'))
 Authors@Laura: person('Laura', 'Spillner', email = 'lau_spi@uni-bremen.de', role = c( 'aut'))
