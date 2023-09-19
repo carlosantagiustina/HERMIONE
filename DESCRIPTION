@@ -1,10 +1,10 @@
 Package: Hermione
 Title: MUHAI Inequality Observatory
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@Carlo: person('Carlo R. M. A.', 'Santagiustina', email = 'carlo.santagiustina@univiu.org', role = c('cre', 'aut'))
 Authors@Laura: person('Laura', 'Spillner', email = 'lau_spi@uni-bremen.de', role = c( 'aut'))
 Authors@VM: person('MUHAI', 'H2020 EU Porject', email = 'muhain.inequality.observatory@gmail.com', role = c('aut'))
-Description: Add description here
+Description: The HERMIONE shiny dashboard, developed by the MUHAI project, allows you to explore co-occurrence networks, fine-grained entity views, and case studies on inequality perception using online sources, such as Twitter data collected in MUHAI's Observatory Knowledge Graph. With HERMIONE you can: (i) Gain insights into how specific forms of inequality are experienced, perceived, and understood across time and contexts. (ii) Understand reactions and challenges to inequality by individuals, institutions, and organizations. (iii) Access powerful methods for retrieving, filtering, aggregating, and analyzing online debates from different perspectives.
 License: What license is it under?
 Imports: 
     bs4Dash (>= 2.0.1),
@@ -13,7 +13,18 @@ Imports:
     fresh (>= 0.2.0), 
     golem (>= 0.3.4),
     shiny (>= 1.7.3),
-    waiter (>= 0.2.5)
+    waiter (>= 0.2.5),
+    shinyWidgets (>= 0.7.6),
+    echarts4r (>= 0.4.4),
+    DT (>= 0.27),
+    bslib (>= 0.4.2),
+    tidyverse (>= 1.3.2),
+    textyle (>= 0.1.0),
+    ipc (>= 0.1.4),
+    visNetwork (>= 2.1.2),
+    httr (>= 1.4.5),
+    tidytext (>= 0.4.1),
+    ggplot2 (>= 3.4.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
