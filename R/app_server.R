@@ -5,7 +5,6 @@
 #' @import golem
 #' @import waiter
 #' @import shinyjs
-#' @import crew
 #' @import shiny
 #' @import shinyWidgets
 #' @import bs4Dash

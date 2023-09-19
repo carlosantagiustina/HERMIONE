@@ -37,7 +37,7 @@ branch) as follows:
 
 ``` r
 library(remotes)
-remotes::install_github("https://github.com/carlosantagiustina/HERMIONE/")
+remotes::install_github("carlosantagiustina/HERMIONE")
 ```
 
 ## How to run the Hermione dashboard

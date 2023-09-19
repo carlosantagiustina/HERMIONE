@@ -19,11 +19,9 @@
 #' @import ipc
 #' @import future
 #' @import promises
-#' @import crew
 #' @import httr
 #' @import tidytext
 #' @import ggplot2
-#' @import aRtsy
 #' @noRd
 
 #### UI PARAMETERS ####
