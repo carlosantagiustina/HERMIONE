@@ -88,16 +88,16 @@ query_and_build_net=function(target_nodes_=100,
                       )
     )
 
-    if(REQUEST$status_code=="200"){
-      CONTENT=content(REQUEST)
-      #%>% mutate(. , n=1)
-    }else{
-      #return(errorCondition(message = REQUEST$status_code))
-      return(REQUEST)
-    }
-
-    CONTENT
-
+    # if(REQUEST$status_code=="200"){
+    #   CONTENT=content(REQUEST)
+    #   #%>% mutate(. , n=1)
+    # }else{
+    #   #return(errorCondition(message = REQUEST$status_code))
+    #   return(REQUEST)
+    # }
+    #
+    # CONTENT
+    REQUEST
   }
   #### DEFINE  FUNCTION TO BUILD BIRD EYE NETWORK ####
   build_net=function(ANSWER_=ANSWER,target_nodes=target_nodes_,percentile=0.9,
@@ -254,7 +254,7 @@ GROUP BY ?sentence ?entity ?entityDB  ?date_time
 ORDER BY ?date_time
 limit ::N_LIMIT::
 '
-ANSWER=REQUEST(QUERY_ = QUERY,
+MYREQUEST=REQUEST(QUERY_ = QUERY,
                PREFIX_ = PREFIX,
                START_DATE_ =START_DATE,
                END_DATE_=END_DATE ,
@@ -264,8 +264,16 @@ ANSWER=REQUEST(QUERY_ = QUERY,
                #,API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY")
                ,RESOURCE_=NA)
 
+ANSWER=content(MYREQUEST)
 results=build_net(ANSWER_  = ANSWER,target_nodes = target_nodes_,filter = filter_)
 #saveRDS(results,file = paste0("results",Sys.Date(),".RDS"))
+results[["my_request"]]=list()
+results[["my_request"]][["url"]]= MYREQUEST$url %>% URLdecode()
+results[["my_request"]][["status_code"]]= MYREQUEST$status_code
+results[["my_request"]][["headers"]]= MYREQUEST$headers
+results[["my_request"]][["request"]]= MYREQUEST$request
+results[["my_request"]][["date"]]= MYREQUEST$date
+results[["my_request"]][["times"]]= MYREQUEST$times
 results
 }
 
@@ -300,6 +308,7 @@ app_server <- function(input, output, session) {
   #### LISTEN INPUT CHANGES ####
   ####search for tweets#####
   vals <- reactiveValues(count = -1)
+  sparqlLog <- reactiveVal("")
   observeEvent(input$range, vals$count <- vals$count + 1)
 
   # Listen_search <- reactive({
@@ -348,6 +357,18 @@ app_server <- function(input, output, session) {
          ))}
      }
    )
+
+   observeEvent(eventExpr = {
+     input$sparqltask  | input$runBE# add other condition that triggers query
+   },{
+     req(reactive_sparqlentresult())
+     sparqlLog({paste0("<br><br>Query date: ",Sys.Date()," Query time: ",Sys.time(),"<br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
+   }
+   )
+
+   output$sparqlqueryURL= renderUI({
+     HTML(text = sparqlLog())
+   })
 
    reactive_bird_network = reactive({
      req(reactive_sparqlentresult())

@@ -714,7 +714,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
               bs4Dash::box(
                 title = "SPARQL Queries Log",
                 width = 12,collapsed = T,
-                "Here a SPARQL query"
+                div(uiOutput("sparqlqueryURL"),style="font-size: 12px;")
                 #, footer = "Advanced parameters for tweeking HERMIONE"
               ),
               bs4Dash::box(
