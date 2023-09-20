@@ -312,160 +312,167 @@ app_server <- function(input, output, session) {
   #   !is.null(input$TW_file)
   # })
 
-  ##### REACTIVE NETWORK AND FILTERS ####
+
+   output$tweet_example <-   renderUI({
+     tagList(
+       tags$blockquote(class = "twitter-tweet",
+                       tags$a(href = "https://twitter.com/equalitytrust/status/1277996661520859136")),
+       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+     )})
+  ####CORE ####
+  ##### COMPONENT 1: BIRD EYE PERSPECTIVE #####
+   ##### REACTIVE NETWORK AND FILTERS ####
 
 
-  # trigger_birdeye <- eventReactive(input$current_tab, {
-  #   req(input$current_tab == 'tab')
-  # })
+   # trigger_birdeye <- eventReactive(input$current_tab, {
+   #   req(input$current_tab == 'tab')
+   # })
 
-  reactive_sparqlentresult = eventReactive(
-    eventExpr = {
-      input$sparqltask  | input$runBE# add other condition that triggers query
-    },
-    ignoreNULL = TRUE,
-    ignoreInit = FALSE,
-    valueExpr = {
-      if (TRUE) {
-        return(withProgress({
-          setProgress(message = "Sending SPARQL query to OKG <br>Please wait...")
-          print(input$dateRange2[1])
-          print(input$dateRange2[2])
-          myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
-        },
-          min = 0,
-          max = 2,
-          value = 1
-        ))}
-      }
-    )
+   reactive_sparqlentresult = eventReactive(
+     eventExpr = {
+       input$sparqltask  | input$runBE# add other condition that triggers query
+     },
+     ignoreNULL = TRUE,
+     ignoreInit = FALSE,
+     valueExpr = {
+       if (TRUE) {
+         return(withProgress({
+           setProgress(message = "Sending SPARQL query to OKG <br>Please wait...")
+           print(input$dateRange2[1])
+           print(input$dateRange2[2])
+           myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+         },
+         min = 0,
+         max = 2,
+         value = 1
+         ))}
+     }
+   )
 
-  reactive_bird_network = reactive({
-    req(reactive_sparqlentresult())
-    myresult<-reactive_sparqlentresult()
-          myresult$network_vis %>%
-            visEvents(hoverNode = "function(nodes) {
+   reactive_bird_network = reactive({
+     req(reactive_sparqlentresult())
+     myresult<-reactive_sparqlentresult()
+     myresult$network_vis %>%
+       visEvents(hoverNode = "function(nodes) {
                 Shiny.onInputChange('current_node_id', nodes);
               ;}") %>%
-            visEvents(hoverEdge = "function(edges) {
+       visEvents(hoverEdge = "function(edges) {
                 Shiny.onInputChange('current_edge_id', edges);
               ;}")
-        }
-  )
+   }
+   )
 
-  output$birdresult <-renderVisNetwork(reactive_bird_network())
+   output$birdresult <-renderVisNetwork(reactive_bird_network())
 
-  #Provide information about selected node
-  output$return_BE_node <- renderPrint({
-    #data$visN_data$nodes[input$BE_current_node_id,]
-    input$current_node_id
-  })
-  #Provide information about selected node
-  output$return_BE_edge  <- renderPrint({
-    # data$visN_data$edges[input$BE_current_edge_id,]
-    input$current_edge_id
-  })
+   #Provide information about selected node
+   output$return_BE_node <- renderPrint({
+     #data$visN_data$nodes[input$BE_current_node_id,]
+     input$current_node_id
+   })
+   #Provide information about selected node
+   output$return_BE_edge  <- renderPrint({
+     # data$visN_data$edges[input$BE_current_edge_id,]
+     input$current_edge_id
+   })
 
-  #Provide information about node positions
-  observeEvent(input$store_position, {
-    visNetworkProxy("birdresult") %>% visGetPositions()
-  })
+   #Provide information about node positions
+   observeEvent(input$store_position, {
+     visNetworkProxy("birdresult") %>% visGetPositions()
+   })
 
-  nodes_positions <- reactive({
-    positions <- input$network_positions
-    if(!is.null(positions)){
-      nodes_positions <- do.call("rbind", lapply(positions, function(x){ data.frame(x = x$x, y = x$y)}))
-      nodes_positions$id <- names(positions)
-      nodes_positions
-    } else {
-      NULL
-    }
-  })
-  #Handle network download
-  output$downloadNetwork <- downloadHandler(
-    filename = function() {
-      paste('network-', Sys.Date(),"_filter",input$entityfilter,"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
-    },
-    content = function(con) {
-      nodes_positions <- nodes_positions()
-      net_data <- as_data_frame(reactive_sparqlentresult()$igraph, what = "both")
-      if(!is.null(nodes_positions)){
-      nodes_save <- merge(net_data$vertices, nodes_positions, by = "id", all = T)
-      } else  {
-        nodes_save <- net_data$vertices
-      }
+   nodes_positions <- reactive({
+     positions <- input$network_positions
+     if(!is.null(positions)){
+       nodes_positions <- do.call("rbind", lapply(positions, function(x){ data.frame(x = x$x, y = x$y)}))
+       nodes_positions$id <- names(positions)
+       nodes_positions
+     } else {
+       NULL
+     }
+   })
+   #Handle network download
+   output$downloadNetwork <- downloadHandler(
+     filename = function() {
+       paste('network-', Sys.Date(),"_filter",input$entityfilter,"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
+     },
+     content = function(con) {
+       nodes_positions <- nodes_positions()
+       net_data <- as_data_frame(reactive_sparqlentresult()$igraph, what = "both")
+       if(!is.null(nodes_positions)){
+         nodes_save <- merge(net_data$vertices, nodes_positions, by = "id", all = T)
+       } else  {
+         nodes_save <- net_data$vertices
+       }
 
-      visNetwork(nodes = nodes_save, edges =net_data$edges,idToLabel = FALSE,
-                 physics = F,type = "square") %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=2.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
-        visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
-        visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
-                   =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
-        visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
-        visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
-                               manipulation = list(enabled = TRUE,deleteNode = T, deleteEdge = T,
-                                                   editEdgeCols = c("title"),
-                                                   editNodeCols = c("title","color")),
-                               nodesIdSelection = list(enabled = T),
-                               highlightNearest = list(enabled = T),
-                               height = "800px",#"fit-content"
-                               width = "100%",
-                               autoResize = T
-        ) %>%
-        visEvents(doubleClick =
-                    "function(params) {
+       visNetwork(nodes = nodes_save, edges =net_data$edges,idToLabel = FALSE,
+                  physics = F,type = "square") %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=2.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
+         visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
+         visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
+                    =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
+         visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
+         visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
+                                manipulation = list(enabled = TRUE,deleteNode = T, deleteEdge = T,
+                                                    editEdgeCols = c("title"),
+                                                    editNodeCols = c("title","color")),
+                                nodesIdSelection = list(enabled = T),
+                                highlightNearest = list(enabled = T),
+                                height = "800px",#"fit-content"
+                                width = "100%",
+                                autoResize = T
+         ) %>%
+         visEvents(doubleClick =
+                     "function(params) {
     var nodeID = params.nodes[0];
     var DBpediaUrl = this.body.nodes[nodeID].options.DBpediaUrl;
     window.open(DBpediaUrl, '_blank');
    }") %>%
-        visExport() %>%
-        visSave(con)
-    }
-  )
+         visExport() %>%
+         visSave(con)
+     }
+   )
 
-  #####  SIDEBAR UPDATES ####
+   #####  SIDEBAR UPDATES ####
 
-  observeEvent(input$toggle_card_sidebar, {
-    updateBoxSidebar("mycardsidebar")
-  })
-  observeEvent(input$BEinfo, {
-    input$BEinfo=T
-  })
+   observeEvent(input$toggle_card_sidebar, {
+     updateBoxSidebar("mycardsidebar")
+   })
+   observeEvent(input$BEinfo, {
+     input$BEinfo=T
+   })
 
-  observeEvent(input$sidebar, {
-    toastOpts$class <- if (input$sidebar) "bg-success" else "bg-danger"
-    toast(
-      title = if (input$sidebar) "Sidebar opened!" else "Sidebar is closed!",
-      options = toastOpts
-    )
-  })
+   observeEvent(input$sidebar, {
+     toastOpts$class <- if (input$sidebar) "bg-success" else "bg-danger"
+     toast(
+       title = if (input$sidebar) "Sidebar opened!" else "Sidebar is closed!",
+       options = toastOpts
+     )
+   })
 
-  #####  CONTROLBAR UPDATES ####
+   #####  CONTROLBAR UPDATES ####
 
-  shiny::observeEvent(input$controlbar, {
-    toastOpts <- list(
-      autohide = TRUE,
-      icon = "fas fa-home",
-      close = FALSE,
-      position = "bottomRight"
-    )
-    toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
-    toast(
-      title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
-      options = toastOpts
-    )
+   shiny::observeEvent(input$controlbar, {
+     toastOpts <- list(
+       autohide = TRUE,
+       icon = "fas fa-home",
+       close = FALSE,
+       position = "bottomRight"
+     )
+     toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
+     toast(
+       title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
+       options = toastOpts
+     )
 
-  })
+   })
 
    shiny::observeEvent(input$controlbarToggleBE, {
-    updateControlbar(id = "controlbar")
-  })
+     updateControlbar(id = "controlbar")
+   })
 
    shiny::observeEvent(input$infobarToggleBE, {
      updateSidebar(id = "BE_info")
    })
 
-  ####CORE ####
-  ##### COMPONENT 1: BIRD EYE PERSPECTIVE #####
   # output$BEnetwork <- renderVisNetwork({
   #
   #  sparql_data= query_and_build_net(target_nodes_ = 200,filter_ = "Trump")

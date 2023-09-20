@@ -9,7 +9,7 @@ License: MIT + file LICENSE
 Imports: 
     bs4Dash (>= 2.2.1),
     config (>= 0.3.1),
-    echarts4r (== 0.4.4), 
+    echarts4r (== 0.4.5), 
     fresh (>= 0.2.0), 
     golem (== 0.3.5),
     future (>= 1.30.0),

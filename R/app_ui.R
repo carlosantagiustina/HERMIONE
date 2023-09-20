@@ -75,6 +75,7 @@ my_theme = fresh::create_theme(
       tags$link(rel="stylesheet",
                 type="text/css",
                 href="www/css/custom.css"),
+    tags$head(tags$script(async = NA, src = "https://platform.twitter.com/widgets.js")),
       # Your application UI logic
       bs4Dash::dashboardPage(
         useShinyjs(),
@@ -82,7 +83,7 @@ my_theme = fresh::create_theme(
           html = tagList(
             waiter::spin_half(),
             br(),
-            tags$img(src = 'https://muhai.org/images/banners/muhai.svg', width = "40%"),
+            tags$img(src = 'https://muhai.org/images/banners/muhai.svg', width = "50%",style="border: 20px solid transparent;"),
             br(),
             br(),
             HTML(
@@ -401,7 +402,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                      tags$ul(
                                        tags$li(tags$span("Node size is proportional to the number of occurrences of the entity")),
                                        tags$li(tags$span("Edge width is proportional to the number of occurrences of the entity")),
-                                       tags$li(tags$span("The shape depends on the type of entity"))))
+                                       tags$li(tags$span("The shape depends on the type of entity"))),
+                                     uiOutput("tweet_example")
+                                     )
                                  }
 
                              )
@@ -786,6 +789,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
 
     tags$head(
       favicon(),
+      #tags$script(async = NA, src = "https://platform.twitter.com/widgets.js"),
       bundle_resources(
         path = app_sys("app/www")
         ,
