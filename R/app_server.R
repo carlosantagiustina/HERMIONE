@@ -106,15 +106,15 @@ query_and_build_net=function(target_nodes_=100,
     DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
 
     if(!is.na(filter)){
-      ANSWER_=ANSWER_[ANSWER_$sentence %in% unique(ANSWER_$sentence[ANSWER_$entity %in% DBPEDIA_DICT$entity[grep(pattern = filter,DBPEDIA_DICT$label)]]),]
+      ANSWER_=ANSWER_[ANSWER_$id %in% unique(ANSWER_$id[ANSWER_$entity %in% DBPEDIA_DICT$entity[grep(pattern = filter,DBPEDIA_DICT$label)]]),]
       DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
       DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
     }
 
-    N_ENTITIES_BY_ID = ANSWER_ %>% group_by(sentence) %>% summarise(n=n())
+    N_ENTITIES_BY_ID = ANSWER_ %>% group_by(id) %>% summarise(n=n())
     N_ENTITES_BY_ENTITY = ANSWER_ %>% group_by(entity) %>% summarise(n=n())
 
-    DFM= ANSWER_ %>% tidytext::cast_dfm(sentence, entity, n)
+    DFM= ANSWER_ %>% tidytext::cast_dfm(id, entity, n)
     FCM = DFM %>% quanteda::fcm()
     #)
     N=quanteda::nfeat(DFM)
@@ -155,7 +155,7 @@ query_and_build_net=function(target_nodes_=100,
     #G <- set_vertex_attr(G, 'opacity', index = V(G), 0.5)
     #G <- set_vertex_attr(G, "title", index = V(G), NA)
     #Edge attributes
-    G <- set_edge_attr(G,"width",index = E(G),E(G)$weight^(1/3))
+    G <- set_edge_attr(G,"width",index = E(G),E(G)$weight^(1/2))
     G <- set_edge_attr(G,"percentile",index = E(G),fmsb::percentile(E(G)$weight)/100)
 
     #min edge cooccurrence filter
@@ -192,7 +192,7 @@ query_and_build_net=function(target_nodes_=100,
         .,
         idToLabel = FALSE,
         physics = T,type = "square"
-      ) %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=2.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
+      ) %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=3.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
       visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
       visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
                  =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
@@ -239,18 +239,22 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
   QUERY =
     '
-SELECT ?sentence ?entity ?entityDB ?date_time  (COUNT(?id) as ?n)
+SELECT ?id ?entity ?entityDB ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity (COUNT(?id) as ?n)
 WHERE {
     ?id schema:mentions ?entityMention ;
-       dc:created ?date_time .
-    ?id  nif:sentence ?sentence .
+        dc:created ?date_time .
     ?entity nif:anchorOf ?entityMention .
+    ?id observatory:sentiment_label ?sentiment .
+    ?id observatory:nb_like ?like .
+    ?id observatory:polarity_score ?polarity .
+    ?id observatory:subjectivity_score ?subjectivity .
+    ?id observatory:nb_repost ?retweet .
     OPTIONAL {?entity nee:hasMatchedURL ?entityDB .}
           FILTER (
         "::START_DATE::"^^xsd:dateTime < ?date_time &&  # start date
           ?date_time < "::END_DATE::"^^xsd:dateTime)   # end date
 }
-GROUP BY ?sentence ?entity ?entityDB  ?date_time
+GROUP BY ?id ?entity ?entityDB  ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity
 ORDER BY ?date_time
 limit ::N_LIMIT::
 '
@@ -283,6 +287,12 @@ results
 app_server <- function(input, output, session) {
   ##### ACTIVATE JS FUNCTION ####
   golem::activate_js()
+  #### SET REACTIVE VALUES ####
+  vals <- reactiveValues(count = -1)
+  random_tweet_ids<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
+  sparqlLog <-reactiveVal("")
+  observeEvent(input$range, vals$count <- vals$count + 1)
+
   ##### INCLUDE PRERENDERED HTML FILES ####
    output$html_1 <- renderUI(includeHTML(system.file("extdata","inflation_economicinequality.html",package = "Hermione")))
 #   output$html_1 <- renderUI(
@@ -307,9 +317,6 @@ app_server <- function(input, output, session) {
         />")
   #### LISTEN INPUT CHANGES ####
   ####search for tweets#####
-  vals <- reactiveValues(count = -1)
-  sparqlLog <- reactiveVal("")
-  observeEvent(input$range, vals$count <- vals$count + 1)
 
   # Listen_search <- reactive({
   #   input$condition==1})
@@ -328,15 +335,61 @@ app_server <- function(input, output, session) {
                        tags$a(href = "https://twitter.com/equalitytrust/status/1277996661520859136")),
        tags$script('twttr.widgets.load(document.getElementById("tweet"));')
      )})
+   ##### HERMIONE SERVER ####
+   ###### Hermione: at Intro ####
+   observeEvent(input$current_tab, {
+     if (input$current_tab == "intro") {
+       showModal(modalDialog(
+         title = "Welcome to the I.O. & HERMIONE!",
+         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                             HTML("<center>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide while exploring MUHAI's Inequality Observatory.<br>
+        If you need help during your journey just click my icon on the buttom of the screen..."))),
+         size="l",
+         label="",
+         icon=icon("life-ring"),
+         easyClose = TRUE,
+         footer = modalButton("Dismiss")
+       ))
+     }
+
+     ###### Hermione: Cases ####
+     if (input$current_tab == "cases") {
+       showModal(modalDialog(
+         title = "Welcome to the case studies section",
+         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                             HTML("Case studies about inequality perception are important to understand the inequality phenomenon because they help to uncover the complex ways in which inequality is experienced, perceived and understood by different groups of people and in different contexts.<br>
+Case studies can provide a detailed understanding of the specific factors that, according to people, contribute to specific forms of inequality, such as discrimination, social norms, and structural barriers.<br>
+They can also reveal how people respond to inequalities and provide insights into the ways in which inequality is perpetuated or challenged by various actors, such as individuals, institutions and organizations. They can also reveal the role of culture, history, and power relations in shaping inequality.
+Finally, case studies can help to highlight the diversity of experiences of multiform inequalities. This is particularly important in addressing intersectionality."))),
+         size="l",
+         label="",
+         icon=icon("life-ring"),
+         easyClose = TRUE,
+         footer = modalButton("Dismiss")
+       ))
+     }
+     ###### Hermione: methods ####
+     if (input$current_tab == "methods") {
+       showModal(modalDialog(
+         title = "Welcome to the methods and references section",
+         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                             HTML("Methods for studying inequality and its perception through social media and other online sources are relevant because the web and its deliberative platforms are powerful communication and information dissemination  tools. These methods allow for the collection and analysis of data from a large and diverse sample of people and can provide access to the spontaneous conversations about inequalities, allowing for the identification of emerging issues and trends related to inequalities and intersectionality."))),
+         size="l",
+         label="",
+         icon=icon("life-ring"),
+         easyClose = TRUE,
+         footer = modalButton("Dismiss")
+       ))
+     }
+   })
   ####CORE ####
   ##### COMPONENT 1: BIRD EYE PERSPECTIVE #####
-   ##### REACTIVE NETWORK AND FILTERS ####
+   ###### REACTIVE NETWORK AND FILTERS ####
 
 
    # trigger_birdeye <- eventReactive(input$current_tab, {
    #   req(input$current_tab == 'tab')
    # })
-
    reactive_sparqlentresult = eventReactive(
      eventExpr = {
        input$sparqltask  | input$runBE# add other condition that triggers query
@@ -350,6 +403,8 @@ app_server <- function(input, output, session) {
            print(input$dateRange2[1])
            print(input$dateRange2[2])
            myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+           random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = 3, replace=FALSE)))
+           myresult
          },
          min = 0,
          max = 2,
@@ -362,9 +417,15 @@ app_server <- function(input, output, session) {
      input$sparqltask  | input$runBE# add other condition that triggers query
    },{
      req(reactive_sparqlentresult())
-     sparqlLog({paste0("<br><br>Query date: ",Sys.Date()," Query time: ",Sys.time(),"<br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
+     sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
    }
    )
+    observeEvent(eventExpr = is.character(input$current_node_id$node) && input$current_node_id$node!="" ,{
+     # require(input$current_node_id$node)
+      myresult= reactive_sparqlentresult()
+random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node])))
+    }
+)
 
    output$sparqlqueryURL= renderUI({
      HTML(text = sparqlLog())
@@ -452,7 +513,7 @@ app_server <- function(input, output, session) {
      }
    )
 
-   #####  SIDEBAR UPDATES ####
+   ######  SIDEBAR UPDATES ####
 
    observeEvent(input$toggle_card_sidebar, {
      updateBoxSidebar("mycardsidebar")
@@ -469,7 +530,7 @@ app_server <- function(input, output, session) {
      )
    })
 
-   #####  CONTROLBAR UPDATES ####
+   ######  CONTROLBAR UPDATES ####
 
    shiny::observeEvent(input$controlbar, {
      toastOpts <- list(
@@ -542,7 +603,41 @@ app_server <- function(input, output, session) {
   #   })
   # }
   #               )
+
+   #extract_tweets_sample <- observeEvent({})
+   output$render_tweets_sample <-   renderUI(
+     {
+    fluidRow(column(width = 4,
+     tagList(
+       tags$blockquote(class = "twitter-tweet",
+                       tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1]))),
+       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+     )),
+     column(width = 4,tagList(
+       tags$blockquote(class = "twitter-tweet",
+                       tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2]))),
+       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+     )),
+     column(width = 4, tagList(
+       tags$blockquote(class = "twitter-tweet",
+                       tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3]))),
+       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+     )),
+     )
+       }
+     )
+
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
+   output$FG_entity_1 <- renderUI({
+     selectInput("TW_search_summary_variable",
+                 "Variable:",
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Economic inequality" )
+   })
+   output$FG_entity_2 <- renderUI({
+     selectInput("TW_search_summary_variable",
+                 "Variable:",
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Inflation" )
+   })
 
   ##### COMPONENT 3: SUMMARY STATS #####
 
@@ -552,53 +647,6 @@ app_server <- function(input, output, session) {
   ###### CASE STUDY 3: #####
   ###### CASE STUDY 4: #####
 
-  ##### HERMIONE SERVER ####
-  ###### Hermione: at Intro ####
-  observeEvent(input$current_tab, {
-    if (input$current_tab == "intro") {
-      showModal(modalDialog(
-        title = "Welcome to the I.O. & HERMIONE!",
-        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-        HTML("<center>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide while exploring MUHAI's Inequality Observatory.<br>
-        If you need help during your journey just click my icon on the buttom of the screen..."))),
-        size="l",
-        label="",
-        icon=icon("life-ring"),
-        easyClose = TRUE,
-        footer = modalButton("Dismiss")
-      ))
-    }
-
-    ###### Hermione: Cases ####
-    if (input$current_tab == "cases") {
-      showModal(modalDialog(
-        title = "Welcome to the case studies section",
-        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-        HTML("Case studies about inequality perception are important to understand the inequality phenomenon because they help to uncover the complex ways in which inequality is experienced, perceived and understood by different groups of people and in different contexts.<br>
-Case studies can provide a detailed understanding of the specific factors that, according to people, contribute to specific forms of inequality, such as discrimination, social norms, and structural barriers.<br>
-They can also reveal how people respond to inequalities and provide insights into the ways in which inequality is perpetuated or challenged by various actors, such as individuals, institutions and organizations. They can also reveal the role of culture, history, and power relations in shaping inequality.
-Finally, case studies can help to highlight the diversity of experiences of multiform inequalities. This is particularly important in addressing intersectionality."))),
-        size="l",
-        label="",
-        icon=icon("life-ring"),
-        easyClose = TRUE,
-        footer = modalButton("Dismiss")
-      ))
-    }
-    ###### Hermione: methods ####
-    if (input$current_tab == "methods") {
-      showModal(modalDialog(
-        title = "Welcome to the methods and references section",
-        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                            HTML("Methods for studying inequality and its perception through social media and other online sources are relevant because the web and its deliberative platforms are powerful communication and information dissemination  tools. These methods allow for the collection and analysis of data from a large and diverse sample of people and can provide access to the spontaneous conversations about inequalities, allowing for the identification of emerging issues and trends related to inequalities and intersectionality."))),
-        size="l",
-        label="",
-        icon=icon("life-ring"),
-        easyClose = TRUE,
-        footer = modalButton("Dismiss")
-      ))
-    }
-  })
   ##### #################################################### WIP
    ###### Hermione on right panel (clickableable) ####
   # observeEvent(input$controlbar, {

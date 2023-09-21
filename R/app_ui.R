@@ -378,8 +378,20 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                                    height = "650px",
                                                    width = "100%")
                             ),
+                            bs4Dash::box(
+                              title = "Example of Tweets from sample",
+                              width = 12,collapsed = T,
+                              div(uiOutput("render_tweets_sample"))
+                              #, footer = "Advanced parameters for tweeking HERMIONE"
+                            ),
+                            bs4Dash::box(
+                              title = "SPARQL Queries Log",
+                              width = 12,collapsed = T,
+                              div(uiOutput("sparqlqueryURL"),style="font-size: 12px;")
+                              #, footer = "Advanced parameters for tweeking HERMIONE"
+                            ),
                             bs4Dash::box(width = 12,
-                                    title = "",
+                                    title = "Selected Nodes and Edges",collapsed = T,
                                     {
                                    div(HTML("<br>Selected node:<br>")
                                   ,verbatimTextOutput("return_BE_node")
@@ -388,7 +400,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                     )}
 
 
-                                    ),color="primary")
+                                    )
+                            ,color="primary")
                             )),
                           sidebar = boxSidebar(
                             startOpen = FALSE,
@@ -661,8 +674,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
             id = "controlbar",
             skin = "light",
             width = golem::get_golem_options("controlbar_width"),
-            collapsed = FALSE,
-            pinned = TRUE,
+            collapsed = TRUE,
+            pinned = FALSE,
             overlay = FALSE,
             bs4Dash::box(
               title = textyle(tags$p("HERMIONE's control room", style = "font-size:2rem;font-weight:200;"),transition = "100",delay = "50",duration = "100",color = "#ffd100"),
@@ -709,38 +722,38 @@ Additionally, web observatories can be used by researchers, citizens, businesses
               #actionButton(inputId = 'cancel',label =  'Cancel',style='font-size:110%; display:center-align'),
               style='display:center-align'),
               br(),
-              #helpText("When you click the button above, you should see the output below update to reflect the value you entered at the top:"),
-              #testing purpose output,
+              dateRangeInput(
+                'dateRange2',
+                label = paste('Twitter data date range (range is limited)'),
+                start = golem::get_golem_options("twitter_data_from"),
+                end =   golem::get_golem_options("twitter_data_to"),
+                min =   golem::get_golem_options("twitter_data_from"),
+                max =   golem::get_golem_options("twitter_data_to"),
+                #  start = "30-05-2020",
+                #  end = "30-08-2020",
+                #  min = "30-05-2020",
+                # max = "30-08-2020",
+                separator = " - ",
+                format = "dd-mm-yy",
+                startview = 'year',
+                language = 'en',
+                weekstart = 1
+              ),
+              sliderInput(inputId = "slider_nmaxrows", "Max Sample Size:", value = 100000,min= 1000, max=100000, step = 1000),
               bs4Dash::box(
-                title = "SPARQL Queries Log",
-                width = 12,collapsed = T,
-                div(uiOutput("sparqlqueryURL"),style="font-size: 12px;")
-                #, footer = "Advanced parameters for tweeking HERMIONE"
+                title = "Bird's-eye Network - Advanced controls",
+                width = 12,
+               # footer = "Advanced parameters for tweeking HERMIONE",
+                textInput(inputId = "entityfilter", "Entity in Tweet RegEx Filter (use | as OR logic separator)", value = "", width = NULL, placeholder = "insert the names of one or more entities separated by | (e.g.,Obama|Trump)"),
+                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird Eye Network View:",value = 100, min=100, max=500,step =  25)
               ),
               bs4Dash::box(
-                title = "Advanced controls - Bird's-eye Network",
+                title = "Fine Grained View",
                 width = 12,
-                footer = "Advanced parameters for tweeking HERMIONE",
-                textInput(inputId = "entityfilter", "Entity in Tweet RegEx Filter (use | as OR logic separator)", value = "", width = NULL, placeholder = "insert the names of one or more entities separated by | (e.g.,Obama|Trump)"),
-                dateRangeInput(
-                  'dateRange2',
-                  label = paste('Twitter data date range (range is limited)'),
-                  start = golem::get_golem_options("twitter_data_from"),
-                  end =   golem::get_golem_options("twitter_data_to"),
-                  min =   golem::get_golem_options("twitter_data_from"),
-                  max =   golem::get_golem_options("twitter_data_to"),
-                  #  start = "30-05-2020",
-                  #  end = "30-08-2020",
-                  #  min = "30-05-2020",
-                  # max = "30-08-2020",
-                  separator = " - ",
-                  format = "dd-mm-yy",
-                  startview = 'year',
-                  language = 'en',
-                  weekstart = 1
-                ),
-                sliderInput(inputId = "slider_nmaxrows", "Max Sample Size:", value = 100000,min= 1000, max=100000, step = 1000),
-                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird Eye Network View:",value = 100, min=100, max=500,step =  25)
+              #  footer = "Advanced parameters for tweeking HERMIONE",
+              uiOutput(outputId = "FG_entity_1"),
+              uiOutput(outputId = "FG_entity_2")
+
               )
             )
           ),
