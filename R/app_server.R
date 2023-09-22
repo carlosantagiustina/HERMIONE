@@ -143,7 +143,8 @@ query_and_build_net=function(target_nodes_=100,
     G <- set_vertex_attr(G, 'value', index = V(G), (featfreq(DFM))^(1/2))# add frequency of nodes
     G <- set_vertex_attr(G, 'percentile', index = V(G), fmsb::percentile(featfreq(DFM))/100)
     G <- set_vertex_attr(G, 'level', index = !is.na(entities$entityDB), 1)
-    G <- set_vertex_attr(G, 'shape', index = !is.na(entities$entityDB), "square")
+    G <- set_vertex_attr(G, 'shape', index = !is.na(entities$entityDB), "square")#
+   # G <- set_vertex_attr(G, 'shape', index = V(G), "text")#square
     # G <- set_vertex_attr(G, 'scaling.label.enabled', index = !is.na(entities$entityDB), "true")
     # G <- set_vertex_attr(G, 'scaling.label.max', index = !is.na(entities$entityDB), 50)
     # G <- set_vertex_attr(G, 'scaling.label.min', index = !is.na(entities$entityDB), 25)
@@ -191,8 +192,15 @@ query_and_build_net=function(target_nodes_=100,
       visNetwork::visIgraph(
         .,
         idToLabel = FALSE,
-        physics = T,type = "square"
-      ) %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=3.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
+        physics = T
+        #,type = "square"
+      ) %>% visNetwork::visEdges(
+        dashes = F,
+        arrows ="",
+        smooth =list(enabled=T,roundness=1,type="discrete"),
+        scaling = list(min=0.25,max=3.5),
+        color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")#color = "lightgray"
+        ) %>%
       visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
       visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
                  =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
@@ -288,7 +296,11 @@ app_server <- function(input, output, session) {
   ##### ACTIVATE JS FUNCTION ####
   golem::activate_js()
   #### SET REACTIVE VALUES ####
-  vals <- reactiveValues(count = -1)
+  #vals <- reactiveValues(count = -1)
+  sparql_queries_BE_n <- reactiveValues(value_BE_n=0)
+  sparql_queries_FG_n <- reactiveValues(value_FG_n=0)
+  hermione_controlroom_tutorial_n <- reactiveValues(value_tut_n=0)
+
   random_tweet_ids<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
   sparqlLog <-reactiveVal("")
   observeEvent(input$range, vals$count <- vals$count + 1)
@@ -392,7 +404,7 @@ Finally, case studies can help to highlight the diversity of experiences of mult
    # })
    reactive_sparqlentresult = eventReactive(
      eventExpr = {
-       input$sparqltask  | input$runBE# add other condition that triggers query
+       input$sparqltaskBE  | input$runBE# add other condition that triggers query
      },
      ignoreNULL = TRUE,
      ignoreInit = FALSE,
@@ -414,7 +426,7 @@ Finally, case studies can help to highlight the diversity of experiences of mult
    )
 
    observeEvent(eventExpr = {
-     input$sparqltask  | input$runBE# add other condition that triggers query
+     input$sparqltaskBE  | input$runBE# add other condition that triggers query
    },{
      req(reactive_sparqlentresult())
      sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
@@ -631,12 +643,12 @@ random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",uni
    output$FG_entity_1 <- renderUI({
      selectInput("TW_search_summary_variable",
                  "Variable:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Economic inequality" )
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Economic inequality" ,selectize = TRUE)
    })
    output$FG_entity_2 <- renderUI({
      selectInput("TW_search_summary_variable",
                  "Variable:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Inflation" )
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Inflation", selectize = TRUE)
    })
 
   ##### COMPONENT 3: SUMMARY STATS #####

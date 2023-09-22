@@ -27,6 +27,7 @@ Imports:
     httr (>= 1.4.5),
     tidytext (>= 0.4.1),
     ggplot2 (>= 3.4.0),
+    shiny.semantic (>= 0.4.3),
     textyle
 Remotes:
     lgnbhl/textyle

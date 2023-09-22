@@ -435,6 +435,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 width = 12,
                                 solidHeader = FALSE,
                                 div(
+                                  fluidRow(
+                                    sortable(
+                                      width = 12,
                                   infoBox(width = 12,
                                           title = "",
                                           icon =icon( "binoculars"),
@@ -443,6 +446,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                   Using this information, the subgraph of a given entity pair is extended with additional nodes containing different characterizations of each entity, and the edge between them is split apart into a number of paths that show different ways in which people understand the relationship between the two selected entities.</h4>"
                                 ),color="primary"),
                                 htmlOutput("html_1")
+                                )
+                                )
                                 )
                               )
                             )),
@@ -715,8 +720,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
               #visNetworkOutput("result",height = "600px",width = "100%"),
               HTML("<hr>"),
               div(style='display:inline-block',
-              fluidRow(
-                shiny::actionButton("sparqltask", "Run: Submit new SPARQL query to OKG",icon = shiny::icon("gears"))
+              fluidRow(column(width = 6,HTML("<b>Step 1</b><br>"),               shiny::actionButton("sparqltaskBE", "Run/Update: Bird's-eye Network",icon = shiny::icon("map"))),
+                       column(width = 6,HTML("<b>Step 2</b><br>"),                 shiny::actionButton("sparqltaskFG", "Run/Update: Fine Grained View",icon = shiny::icon("binoculars")))
                 ),
               #actionButton(inputId = 'run',label =  'Run',style='font-size:110%; display:center-align'),
               #actionButton(inputId = 'cancel',label =  'Cancel',style='font-size:110%; display:center-align'),
@@ -745,10 +750,11 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                 width = 12,
                # footer = "Advanced parameters for tweeking HERMIONE",
                 textInput(inputId = "entityfilter", "Entity in Tweet RegEx Filter (use | as OR logic separator)", value = "", width = NULL, placeholder = "insert the names of one or more entities separated by | (e.g.,Obama|Trump)"),
-                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird Eye Network View:",value = 100, min=100, max=500,step =  25)
+                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird's-eye Network View:",value = 100, min=100, max=500,step =  25)
               ),
               bs4Dash::box(
-                title = "Fine Grained View",
+                title = "Fine Grained View  - Advanced controls
+",
                 width = 12,
               #  footer = "Advanced parameters for tweeking HERMIONE",
               uiOutput(outputId = "FG_entity_1"),
