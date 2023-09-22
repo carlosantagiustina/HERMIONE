@@ -36,6 +36,7 @@ You can install the development version of Hermione from GitHub (main
 branch) as follows:
 
 ``` r
+install.packages("remotes")
 library(remotes)
 remotes::install_github("carlosantagiustina/HERMIONE")
 ```
