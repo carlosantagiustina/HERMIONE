@@ -186,7 +186,9 @@ query_and_build_net=function(target_nodes_=100,
 
       G <- subgraph.edges(G, E(G)[!E(G)$below_threshold], delete.vertices = T)
     }
-
+    #remove isolated nodes
+    Isolated = which(degree(G)==0)
+    G = delete.vertices(G, Isolated)
     #
     NETWORK=G %>%
       visNetwork::visIgraph(
@@ -415,6 +417,7 @@ Finally, case studies can help to highlight the diversity of experiences of mult
            print(input$dateRange2[1])
            print(input$dateRange2[2])
            myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+        #if(myresult=="Error: Not enought entity mentions") return(NULL)
            random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = 3, replace=FALSE)))
            myresult
          },
@@ -544,20 +547,20 @@ random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",uni
 
    ######  CONTROLBAR UPDATES ####
 
-   shiny::observeEvent(input$controlbar, {
-     toastOpts <- list(
-       autohide = TRUE,
-       icon = "fas fa-home",
-       close = FALSE,
-       position = "bottomRight"
-     )
-     toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
-     toast(
-       title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
-       options = toastOpts
-     )
-
-   })
+   # shiny::observeEvent(input$controlbar, {
+   #   toastOpts <- list(
+   #     autohide = TRUE,
+   #     icon = "fas fa-home",
+   #     close = FALSE,
+   #     position = "bottomRight"
+   #   )
+   #   toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
+   #   toast(
+   #     title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
+   #     options = toastOpts
+   #   )
+   #
+   # })
 
    shiny::observeEvent(input$controlbarToggleBE, {
      updateControlbar(id = "controlbar")

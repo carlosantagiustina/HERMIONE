@@ -681,7 +681,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
             width = golem::get_golem_options("controlbar_width"),
             collapsed = TRUE,
             pinned = FALSE,
-            overlay = FALSE,
+            overlay = TRUE,
             bs4Dash::box(
               title = textyle(tags$p("HERMIONE's control room", style = "font-size:2rem;font-weight:200;"),transition = "100",delay = "50",duration = "100",color = "#ffd100"),
               footer = "Tell HERMIONE what to do by setting the parameters for your exploration",
