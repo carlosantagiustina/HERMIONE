@@ -126,7 +126,10 @@ query_and_build_net=function(target_nodes_=100,
     FCM_SELECT <- quanteda::fcm_select(FCM, pattern = quanteda::featnames(DFM),
                                        selection = "keep",
                                        valuetype = "fixed")
-    if(nrow(FCM_SELECT)<5){return(message("Error: Not enought entity mentions"))}
+    if(nrow(FCM_SELECT)<5){return({
+      message("Error: Not enought entity mentions")
+      NULL}
+      )}
     G = FCM_SELECT %>% quanteda.textplots::as.igraph(.,
                                                      omit_isolated = F,
                                                      weighted = T)
@@ -418,7 +421,12 @@ Finally, case studies can help to highlight the diversity of experiences of mult
            print(input$dateRange2[2])
            myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
         #if(myresult=="Error: Not enought entity mentions") return(NULL)
-           random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = 3, replace=FALSE)))
+           #n_unique=length(unique(myresult$n_ent_by_id$id))
+           #random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = n_unique, replace=FALSE)))
+           if(is.null(myresult)){return(NULL)}
+           if(length(unique(myresult$n_ent_by_id$id))>=1){
+             random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$n_ent_by_id$id))))
+             }
            myresult
          },
          min = 0,
@@ -429,16 +437,19 @@ Finally, case studies can help to highlight the diversity of experiences of mult
    )
 
    observeEvent(eventExpr = {
-     input$sparqltaskBE  | input$runBE# add other condition that triggers query
+     (input$sparqltaskBE | input$runBE)
+     #&& reactive_sparqlentresult()!=# add other condition that triggers query
    },{
      req(reactive_sparqlentresult())
      sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
    }
    )
+
+   #Sample tweets for selected entity
     observeEvent(eventExpr = is.character(input$current_node_id$node) && input$current_node_id$node!="" ,{
      # require(input$current_node_id$node)
       myresult= reactive_sparqlentresult()
-random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node])))
+random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node]))))
     }
 )
 

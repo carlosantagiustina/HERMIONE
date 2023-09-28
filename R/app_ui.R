@@ -379,8 +379,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                                    width = "100%")
                             ),
                             bs4Dash::box(
-                              title = "Example of Tweets from sample",
+                              title = "Sample of Tweets matching Query",
                               width = 12,collapsed = T,
+                              HTML("<i>Select a node in the Bird's-eye Network to see a ramdom sample of retrieved posts referring to that entity</i>"),
                               div(uiOutput("render_tweets_sample"))
                               #, footer = "Advanced parameters for tweeking HERMIONE"
                             ),
