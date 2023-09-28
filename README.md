@@ -61,3 +61,5 @@ Hermione::run_app()
   <carlo.santagiustina@univiu.org>
 
 - (contributor) Laura Spillner <laura.spillner@uni-bremen.de>
+
+  Hermoine queries and consumes in real time data from MUHAI's OKG. Source code and information available at this link: (https://github.com/muhai-project/okg_media_discourse)[https://github.com/muhai-project/okg_media_discourse]
