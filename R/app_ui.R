@@ -28,7 +28,7 @@
 
 #### THEME ####
 my_theme = fresh::create_theme(
-  bs4dash_vars(
+  fresh::bs4dash_vars(
     navbar_light_color = "#ffd100",
     navbar_light_active_color = "#ffd100",
     navbar_light_hover_color = "#ffd100"
