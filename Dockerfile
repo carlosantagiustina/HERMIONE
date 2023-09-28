@@ -27,6 +27,7 @@ RUN Rscript -e 'remotes::install_version("shinyWidgets",upgrade="never", version
 RUN Rscript -e 'remotes::install_version("future",upgrade="never", version = "1.30.0")'
 RUN Rscript -e 'remotes::install_version("golem",upgrade="never", version = "0.3.5")'
 RUN Rscript -e 'remotes::install_version("bs4Dash",upgrade="never", version = "2.2.1")'
+RUN Rscript -e 'remotes::install_version("quanteda",upgrade="never", version = "3.2.4")'
 RUN Rscript -e 'remotes::install_github("lgnbhl/textyle@8bb208e52dcc6e364b6f903283c319f67d9980be")'
 RUN mkdir /build_zone
 ADD . /build_zone
