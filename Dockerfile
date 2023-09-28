@@ -28,6 +28,8 @@ RUN Rscript -e 'remotes::install_version("future",upgrade="never", version = "1.
 RUN Rscript -e 'remotes::install_version("golem",upgrade="never", version = "0.3.5")'
 RUN Rscript -e 'remotes::install_version("bs4Dash",upgrade="never", version = "2.2.1")'
 RUN Rscript -e 'remotes::install_version("quanteda",upgrade="never", version = "3.2.4")'
+RUN Rscript -e 'remotes::install_version("quanteda.textplots",upgrade="never", version = "0.94.2")'
+RUN Rscript -e 'remotes::install_version("fmsb",upgrade="never", version = "0.7.5")'
 RUN Rscript -e 'remotes::install_github("lgnbhl/textyle@8bb208e52dcc6e364b6f903283c319f67d9980be")'
 RUN mkdir /build_zone
 ADD . /build_zone
@@ -35,4 +37,5 @@ WORKDIR /build_zone
 RUN R -e 'remotes::install_local(upgrade="never")'
 RUN rm -rf /build_zone
 EXPOSE 80
-CMD R -e "options('shiny.port'=80,shiny.host='0.0.0.0');Hermione::run_app()"
+EXPOSE 8787
+CMD R -e "options('shiny.port'=80,shiny.host='0.0.0.0');Hermione:::run_app()"
