@@ -36,7 +36,6 @@ You can install the development version of Hermione from GitHub (main
 branch) as follows:
 
 ``` r
-install.packages("remotes")
 library(remotes)
 remotes::install_github("carlosantagiustina/HERMIONE")
 ```
@@ -62,4 +61,8 @@ Hermione::run_app()
 
 - (contributor) Laura Spillner <laura.spillner@uni-bremen.de>
 
+Hermoine queries and consumes in real time data from MUHAI’s Observatory
+Knowledge Graph. Source code and more information about the OKG is
+available at this link:
 
+<https://github.com/muhai-project/okg_media_discourse>
