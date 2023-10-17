@@ -45,7 +45,7 @@ query_and_build_net=function(target_nodes_=100,
 
   REQUEST= function(QUERY_=QUERY,PREFIX_=PREFIX,
                     ENDPOINT_=ENDPOINT
-                    #,API_KEY_=API_KEY
+                    ,API_KEY_=API_KEY
                     , START_DATE_=START_DATE,
                     END_DATE_=END_DATE,
                     TIMEOUT_=30,
@@ -82,9 +82,9 @@ query_and_build_net=function(target_nodes_=100,
     REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
                       query=list("query"=MY_QUERY),
                       add_headers("Accept"= "text/csv"
-                                  # ,"Authorization" = paste('Bearer',
-                                  #                         API_KEY_,
-                                  #                         sep=" ")
+                                  ,"Authorization" = paste('Bearer',
+                                                          API_KEY_,
+                                                          sep=" ")
                       )
     )
 
@@ -278,7 +278,7 @@ MYREQUEST=REQUEST(QUERY_ = QUERY,
                N_THRESHOLD_=N_THRESHOLD,
                N_LIMIT_ = N_LIMIT,
                ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql"
-               #,API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY")
+               ,API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY")
                ,RESOURCE_=NA)
 
 ANSWER=content(MYREQUEST)
