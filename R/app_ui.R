@@ -381,8 +381,21 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             bs4Dash::box(
                               title = "Sample of Tweets matching Query",
                               width = 12,collapsed = T,
-                              HTML("<i>Select a node in the Bird's-eye Network to see a ramdom sample of retrieved posts referring to that entity</i>"),
-                              div(uiOutput("render_tweets_sample"))
+                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i>(gray squares: posts hidden by Twitter for privacy compliance; Not found: posts that have been delated by their author and posts from accounts that don't exist anymore)</i>"),
+                              #div(uiOutput("render_tweets_sample")),
+                              div(fluidRow(uiOutput("render_tweet1_sample"),
+                                           uiOutput("render_tweet2_sample"),
+                                           uiOutput("render_tweet3_sample"),
+                                           uiOutput("render_tweet4_sample"),
+                                           uiOutput("render_tweet5_sample"),
+                                           uiOutput("render_tweet6_sample"),
+                                           uiOutput("render_tweet7_sample"),
+                                           uiOutput("render_tweet8_sample"),
+                                           uiOutput("render_tweet9_sample"),
+                                           uiOutput("render_tweet10_sample"),
+                                           uiOutput("render_tweet11_sample"),
+                                           uiOutput("render_tweet12_sample")
+                                           ))
                               #, footer = "Advanced parameters for tweeking HERMIONE"
                             ),
                             bs4Dash::box(

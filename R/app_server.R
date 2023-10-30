@@ -36,6 +36,15 @@ query_and_build_net=function(target_nodes_=100,
                              OFFSET=0,
                              N_LIMIT=0){
 
+  #parameters for testing purpose
+  target_nodes_=100
+  filter_=NA
+  START_DATE="2018-01-01"
+  END_DATE="2024-01-01"
+  N_THRESHOLD=2
+  OFFSET=0
+  N_LIMIT=0
+
   require(httr)
   require(tidytext)
   require(tidyverse)
@@ -230,7 +239,7 @@ query_and_build_net=function(target_nodes_=100,
   }
 
   PREFIX='
-PREFIX observatory: <http://example.org/muhai/observatory#>
+PREFIX observatory: <https://www.w3id.org/okg/obio-ontology/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX sioc: <http://rdfs.org/sioc/ns#>
@@ -278,7 +287,7 @@ MYREQUEST=REQUEST(QUERY_ = QUERY,
                N_THRESHOLD_=N_THRESHOLD,
                N_LIMIT_ = N_LIMIT,
                ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql"
-               ,API_KEY_ = Sys.getenv("HERMIONE_ENDPOINT_KEY")
+               ,API_KEY_ =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
                ,RESOURCE_=NA)
 
 ANSWER=content(MYREQUEST)
@@ -631,28 +640,149 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
   #               )
 
    #extract_tweets_sample <- observeEvent({})
-   output$render_tweets_sample <-   renderUI(
-     {
-    fluidRow(column(width = 4,
-     tagList(
-       tags$blockquote(class = "twitter-tweet",
-                       tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1]))),
-       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-     )),
-     column(width = 4,tagList(
-       tags$blockquote(class = "twitter-tweet",
-                       tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2]))),
-       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-     )),
-     column(width = 4, tagList(
-       tags$blockquote(class = "twitter-tweet",
-                       tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3]))),
-       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-     )),
-     )
-       }
-     )
+   # output$render_tweets_sample <-   renderUI(
+   #   {
+   #  fluidRow(column(width = 4,
+   #   tagList(
+   #     tags$blockquote(class = "twitter-tweet",
+   #                     tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1])))
+   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+   #   )),
+   #   column(width = 4,tagList(
+   #     tags$blockquote(class = "twitter-tweet",
+   #                     tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2])))
+   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+   #   )),
+   #   column(width = 4, tagList(
+   #     tags$blockquote(class = "twitter-tweet",
+   #                     tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3])))
+   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+   #   )),
+   #   )
+   #     }
+   #   )
 
+
+   output$render_tweet1_sample <-   renderUI(
+     {column(width = 8,
+                       tagList(
+                         tags$blockquote(class = "twitter-tweet",
+                                         tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1])))
+                         ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+                       )
+       )
+     }
+   )
+   output$render_tweet2_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[2])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet3_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[3])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet4_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[4])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet5_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[5])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet6_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[6])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet7_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[7])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet8_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[8])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet9_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[9])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet10_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[10])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet11_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[11])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
+   output$render_tweet12_sample <-   renderUI(
+     {column(width = 8,
+             tagList(
+               tags$blockquote(class = "twitter-tweet",
+                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[12])))
+               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+             )
+     )
+     }
+   )
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
    output$FG_entity_1 <- renderUI({
      selectInput("TW_search_summary_variable",

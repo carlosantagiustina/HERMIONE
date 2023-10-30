@@ -1,10 +1,10 @@
 Package: Hermione
-Title: HERMIONE - MUHAI Inequality Observatory
-Version: 0.1.0
-Authors@Carlo: person('Carlo R. M. A.', 'Santagiustina', email = 'carlo.santagiustina@univiu.org', role = c('cre', 'aut'))
-Authors@Laura: person('Laura', 'Spillner', email = 'lau_spi@uni-bremen.de', role = c( 'aut'))
+Title: HERMIONE - a MUHAI Social Inequality Observatory dashboard
+Version: 0.2.0
+Authors@Carlo: person('Carlo R. M. A.', 'Santagiustina', email = 'carlo.santagiustina@univiu.org', role = c('cre', 'aut'), comment = c(ORCID = '0000-0003-3253-1263'))
+Authors@Laura: person('Laura', 'Spillner', email = 'lau_spi@uni-bremen.de', role = c( 'aut'), comment = c(ORCID = '0000-0001-8490-8961'))
 Authors@VM: person('MUHAI', 'H2020 EU Porject', email = 'muhain.inequality.observatory@gmail.com', role = c('aut'))
-Description: The HERMIONE shiny dashboard, developed by the MUHAI project, allows you to explore co-occurrence networks, fine-grained entity views, and case studies on inequality perception using online sources, such as Twitter data collected in MUHAI's Observatory Knowledge Graph. With HERMIONE you can: (i) Gain insights into how specific forms of inequality are experienced, perceived, and understood across time and contexts. (ii) Understand reactions and challenges to inequality by individuals, institutions, and organizations. (iii) Access powerful methods for retrieving, filtering, aggregating, and analyzing online debates from different perspectives.
+Description: The HERMIONE shiny dashboard, developed by the MUHAI project as part of the Social Inequality Observatory (SIO) ecosystem, allows you to explore co-occurrence networks, fine-grained entity views, and case studies on inequality perception using online sources, such as Twitter data collected in MUHAI's Observatory Knowledge Graph. With HERMIONE you can: (i) Gain insights into how specific forms of inequality are experienced, perceived, and understood across time and contexts. (ii) Understand reactions and challenges to inequality by individuals, institutions, and organizations. (iii) Access powerful methods for retrieving, filtering, aggregating, and analyzing online debates from different perspectives.
 License: Apache 2 + file LICENSE
 Imports: 
     bs4Dash (>= 2.2.1),
