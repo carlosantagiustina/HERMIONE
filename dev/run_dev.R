@@ -11,9 +11,11 @@ golem::detach_all_attached()
 # Document and reload your package
 golem::document_and_reload()
 
+reactlog::reactlog_enable()
+options(shiny.reactlog=TRUE)
 # Run the application
 Hermione::run_app()
-
+shiny::reactlogShow()
 
 #Run application with options
 

@@ -19,6 +19,7 @@
 #' @import httr
 #' @import tidytext
 #' @import ggplot2
+#' @import reactlog
 #' @noRd
 
 #### SERVER PARAMETERS ####
@@ -28,6 +29,7 @@ initial_server_parameters <- list(
 )
 
 #### FUNCTIONS ####
+
 query_and_build_net=function(target_nodes_=100,
                              filter_=NA,
                              START_DATE="2018-01-01",
@@ -37,10 +39,10 @@ query_and_build_net=function(target_nodes_=100,
                              N_LIMIT=0){
 
   #parameters for testing purpose
-  target_nodes_=100
-  filter_=NA
-  START_DATE="2018-01-01"
-  END_DATE="2024-01-01"
+  #target_nodes_=100
+  #filter_="Obama"
+  #START_DATE="2018-01-01"
+  #END_DATE="2024-01-01"
   N_THRESHOLD=2
   OFFSET=0
   N_LIMIT=0
@@ -90,7 +92,9 @@ query_and_build_net=function(target_nodes_=100,
     #RUN REQUEST
     REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
                       query=list("query"=MY_QUERY),
-                      add_headers("Accept"= "text/csv"
+                      add_headers(
+                        #"Accept"= "text/csv"
+                        "Accept"= "application/json"
                                   ,"Authorization" = paste('Bearer',
                                                           API_KEY_,
                                                           sep=" ")
@@ -110,12 +114,20 @@ query_and_build_net=function(target_nodes_=100,
   }
   #### DEFINE  FUNCTION TO BUILD BIRD EYE NETWORK ####
   build_net=function(ANSWER_=ANSWER,target_nodes=target_nodes_,percentile=0.9,
-                     power=4,filter=NA){
+                     power=4,filter=filter_){
+  ## Parameters for testing
+    #ANSWER_=ANSWER
+    #target_nodes=target_nodes_
+    #filter=filter_
+    #percentile=0.9
+    #power=4
+  ##
     DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
     DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
 
     if(!is.na(filter)){
       ANSWER_=ANSWER_[ANSWER_$id %in% unique(ANSWER_$id[ANSWER_$entity %in% DBPEDIA_DICT$entity[grep(pattern = filter,DBPEDIA_DICT$label)]]),]
+
       DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
       DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
     }
@@ -172,7 +184,7 @@ query_and_build_net=function(target_nodes_=100,
     G <- set_edge_attr(G,"percentile",index = E(G),fmsb::percentile(E(G)$weight)/100)
 
     #min edge cooccurrence filter
-    G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F) # delete all edges that occurr only once should remove about 90% for big graphs
+    #G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F) # delete all edges that occurr only once should remove about 90% for big graphs
 
     #target_nodes=100
 
@@ -183,9 +195,11 @@ query_and_build_net=function(target_nodes_=100,
 
     #percentile filter
 
-    if(igraph::vcount(G)/igraph::ecount(G)> 10*(target_nodes/100) | igraph::graph.density(G)>0.25){
+    if( igraph::graph.density(G)>0.25){
+      #igraph::ecount(G)/igraph::vcount(G)> 10*(target_nodes/100) |
       # percentile=0.9
       # power=4
+      G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F)
       V(G)$edge_threshold <- sapply(names(V(G)),function(x,Graph=G, p=percentile*(V(G)$percentile^power)){quantile(incident(Graph, x, mode = "all")$weight,probs = p, na.rm = FALSE,
                                                                                                                    names = FALSE, digits = 7)})
       filter_edges=function(x,Graph=G){
@@ -290,7 +304,10 @@ MYREQUEST=REQUEST(QUERY_ = QUERY,
                ,API_KEY_ =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
                ,RESOURCE_=NA)
 
-ANSWER=content(MYREQUEST)
+#ANSWER=content(MYREQUEST)
+if(!is.data.frame(content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T))){return()}
+
+ANSWER=content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
 results=build_net(ANSWER_  = ANSWER,target_nodes = target_nodes_,filter = filter_)
 #saveRDS(results,file = paste0("results",Sys.Date(),".RDS"))
 results[["my_request"]]=list()
@@ -358,7 +375,7 @@ app_server <- function(input, output, session) {
    output$tweet_example <-   renderUI({
      tagList(
        tags$blockquote(class = "twitter-tweet",
-                       tags$a(href = "https://twitter.com/equalitytrust/status/1277996661520859136")),
+                       tags$a(href = "https://twitter.com/twitter/status/1277996661520859136")),
        tags$script('twttr.widgets.load(document.getElementById("tweet"));')
      )})
    ##### HERMIONE SERVER ####
@@ -416,6 +433,7 @@ Finally, case studies can help to highlight the diversity of experiences of mult
    # trigger_birdeye <- eventReactive(input$current_tab, {
    #   req(input$current_tab == 'tab')
    # })
+
    reactive_sparqlentresult = eventReactive(
      eventExpr = {
        input$sparqltaskBE  | input$runBE# add other condition that triggers query
@@ -426,9 +444,14 @@ Finally, case studies can help to highlight the diversity of experiences of mult
        if (TRUE) {
          return(withProgress({
            setProgress(message = "Sending SPARQL query to OKG <br>Please wait...")
-           print(input$dateRange2[1])
-           print(input$dateRange2[2])
+           print(paste0("START_DATE: ",input$dateRange2[1]))
+           print(paste0("END_DATE: ",input$dateRange2[2]))
+           print(paste0("filter_: ",input$entityfilter))
+           print(paste0("target_nodes_: ",input$slider_nentites))
+           print(paste0("N_LIMIT: ",input$slider_nmaxrows))
+
            myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+
         #if(myresult=="Error: Not enought entity mentions") return(NULL)
            #n_unique=length(unique(myresult$n_ent_by_id$id))
            #random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = n_unique, replace=FALSE)))
@@ -662,12 +685,16 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
    #     }
    #   )
 
+   #browser()
+   #observe({
+   #print(random_tweet_ids()[1:12])
+   #})
 
    output$render_tweet1_sample <-   renderUI(
      {column(width = 8,
                        tagList(
                          tags$blockquote(class = "twitter-tweet",
-                                         tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1])))
+                                         tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[1])))
                          ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
                        )
        )
@@ -677,7 +704,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[2])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -687,7 +714,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[3])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -697,7 +724,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[4])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[4])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -707,7 +734,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[5])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[5])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -717,7 +744,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[6])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[6])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -727,7 +754,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[7])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[7])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -737,7 +764,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[8])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[8])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -747,7 +774,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[9])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[9])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -757,7 +784,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[10])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[10])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -767,7 +794,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[11])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[11])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
@@ -777,12 +804,13 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      {column(width = 8,
              tagList(
                tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[12])))
+                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[12])))
                ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
              )
      )
      }
    )
+   #browser()
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
    output$FG_entity_1 <- renderUI({
      selectInput("TW_search_summary_variable",
