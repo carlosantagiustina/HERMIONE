@@ -29,228 +29,277 @@ initial_server_parameters <- list(
 )
 
 #### FUNCTIONS ####
-
-query_and_build_net=function(target_nodes_=100,
-                             filter_=NA,
-                             START_DATE="2018-01-01",
-                             END_DATE="2024-01-01" ,
-                             N_THRESHOLD=2,
-                             OFFSET=0,
-                             N_LIMIT=0){
-
-  #parameters for testing purpose
-  #target_nodes_=100
-  #filter_="Obama"
-  #START_DATE="2018-01-01"
-  #END_DATE="2024-01-01"
-  N_THRESHOLD=2
-  OFFSET=0
-  N_LIMIT=0
+REQUEST= function(QUERY_,
+                  PREFIX_,
+                  ENDPOINT_,
+                  API_KEY_,
+                  START_DATE_,
+                  END_DATE_,
+                  ENTITY_="",
+                  TIMEOUT_=30,
+                  #RESOURCE_=RESOURCE,
+                  N_THRESHOLD_=2,
+                  N_LIMIT_=0,
+                  OFFSET_=0){
+  #PASTE PREFIXES AND QUERY
+  MY_QUERY=paste0(PREFIX_,QUERY_)
 
   require(httr)
   require(tidytext)
   require(tidyverse)
-  library(quanteda)
-  library(igraph)
-  library(visNetwork)
 
-  REQUEST= function(QUERY_=QUERY,PREFIX_=PREFIX,
-                    ENDPOINT_=ENDPOINT
-                    ,API_KEY_=API_KEY
-                    , START_DATE_=START_DATE,
-                    END_DATE_=END_DATE,
-                    TIMEOUT_=30,
-                    RESOURCE_=RESOURCE,
-                    N_THRESHOLD_=N_THRESHOLD,
-                    N_LIMIT_=N_LIMIT){
-    #PASTE PREFIXES AND QUERY
-    MY_QUERY=paste0(PREFIX_,QUERY_)
-
-    #SOBSTITUTE PARAMETERS IF ANY
-    if(!is.na(START_DATE_) && grepl(pattern = "[:][:]START[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
-      MY_QUERY = MY_QUERY %>%
-        gsub("::START_DATE::",START_DATE_,ignore.case = F,x=.)
-    }
-    if(!is.na(END_DATE_) && grepl(pattern = "[:][:]END[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
-      MY_QUERY = MY_QUERY %>%
-        gsub("::END_DATE::",END_DATE_,ignore.case = F,x=.)
-    }
-    if(!is.na(RESOURCE_) && grepl(pattern = "[:][:]RESOURCE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
-      MY_QUERY = MY_QUERY %>%
-        gsub("::RESOURCE::",RESOURCE_,ignore.case = F,x=.)
-    }
-    if(!is.na(N_THRESHOLD_) && grepl(pattern = "[:][:]N_THRESHOLD[:][:]",x = QUERY_,perl = T,ignore.case = F)){
-      MY_QUERY = MY_QUERY %>%
-        gsub("::N_THRESHOLD::",N_THRESHOLD_,ignore.case = F,x=.)
-    }
-    if(!is.na(N_LIMIT_) && grepl(pattern = "[:][:]N_LIMIT[:][:]",x = QUERY_,perl = T,ignore.case = F)){
-      MY_QUERY = MY_QUERY %>%
-        gsub("::N_LIMIT::",N_LIMIT_,ignore.case = F,x=.)
-    }
-
-
-    #RUN REQUEST
-    REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
-                      query=list("query"=MY_QUERY),
-                      add_headers(
-                        #"Accept"= "text/csv"
-                        "Accept"= "application/json"
-                                  ,"Authorization" = paste('Bearer',
-                                                          API_KEY_,
-                                                          sep=" ")
-                      )
-    )
-
-    # if(REQUEST$status_code=="200"){
-    #   CONTENT=content(REQUEST)
-    #   #%>% mutate(. , n=1)
-    # }else{
-    #   #return(errorCondition(message = REQUEST$status_code))
-    #   return(REQUEST)
-    # }
-    #
-    # CONTENT
-    REQUEST
+  #SOBSTITUTE PARAMETERS IF ANY
+  if(!is.na(START_DATE_) && grepl(pattern = "[:][:]START[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::START_DATE::",START_DATE_,ignore.case = F,x=.)
   }
-  #### DEFINE  FUNCTION TO BUILD BIRD EYE NETWORK ####
-  build_net=function(ANSWER_=ANSWER,target_nodes=target_nodes_,percentile=0.9,
-                     power=4,filter=filter_){
-  ## Parameters for testing
-    #ANSWER_=ANSWER
-    #target_nodes=target_nodes_
-    #filter=filter_
-    #percentile=0.9
-    #power=4
-  ##
-    DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
-    DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
+  if(!is.na(END_DATE_) && grepl(pattern = "[:][:]END[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::END_DATE::",END_DATE_,ignore.case = F,x=.)
+  }
+  if(!is.na(N_THRESHOLD_) && grepl(pattern = "[:][:]N_THRESHOLD[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::N_THRESHOLD::",N_THRESHOLD_,ignore.case = F,x=.)
+  }
 
-    if(!is.na(filter)){
-      ANSWER_=ANSWER_[ANSWER_$id %in% unique(ANSWER_$id[ANSWER_$entity %in% DBPEDIA_DICT$entity[grep(pattern = filter,DBPEDIA_DICT$label)]]),]
+  print(MY_QUERY)
+  print(paste0("N_LIMIT_: ",N_LIMIT_))
+  print(paste0("OFFSET_: ",OFFSET_))
 
-      DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
-      DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
+
+  if( is.numeric(N_LIMIT_) && N_LIMIT_>0){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::N_LIMIT::",gsub("[.]$","",x = paste0("LIMIT ",format(N_LIMIT_, scientific = F))),ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::N_LIMIT::","",ignore.case = F,x=.)
+  }
+
+  if( !(is.na(ENTITY_) | ENTITY_=="")){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::CONTAINSENTITYFILTER::",
+           paste0('&&
+            regex(?entity2,"',gsub(" ","_",ENTITY_),'", "i")'),ignore.case = F,x=.)
+    MY_QUERY = MY_QUERY %>%
+      gsub("::CONTAINSENTITY::","
+      ?id schema:mentions ?entityMention2 .
+    ?entity2 nif:anchorOf ?entityMention2 .",ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITYFILTER::","",ignore.case = F,x=.)
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITY::","",ignore.case = F,x=.)
+  }
+
+  if( is.numeric(OFFSET_) && OFFSET_>0){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::OFFSET::",gsub("[.]$","",x = paste0("\nOFFSET ",format(OFFSET_, scientific = F))),ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::OFFSET::","",ignore.case = F,x=.)
+  }
+
+print(MY_QUERY)
+  #RUN REQUEST
+  REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
+                    query=list("query"=MY_QUERY),
+                    add_headers(
+                      #"Accept"= "text/csv"
+                      "Accept"= "application/json"
+                      ,"Authorization" = paste('Bearer',
+                                               API_KEY_,
+                                               sep=" ")
+                    )
+  )
+
+  REQUEST
+}
+
+#### DEFINE  FUNCTION TO BUILD BIRD EYE NETWORK ####
+build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
+                   power=4,filter=NA){
+## Parameters for testing
+  # ANSWER_=ANSWER
+  # target_nodes=target_nodes_
+  # filter=filter_
+  # percentile=0.9
+  # power=4
+##
+  require(tidytext)
+  require(tidyverse)
+  require(quanteda)
+  require(igraph)
+  require(visNetwork)
+
+  DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
+  DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
+
+  # if(!is.na(filter)){
+  #   ANSWER_=ANSWER_[ANSWER_$id %in% unique(ANSWER_$id[ANSWER_$entity %in% DBPEDIA_DICT$entity[grep(pattern = filter,DBPEDIA_DICT$label)]]),]
+  #
+  #   DBPEDIA_DICT = unique(ANSWER_[,c('entity','entityDB')])
+  #   DBPEDIA_DICT=DBPEDIA_DICT  %>% mutate(label=URLdecode(gsub(pattern="_",replacement=" ",x=gsub("http://example.com/ent_","",x = entity))))
+  # }
+
+  N_ENTITIES_BY_ID = ANSWER_ %>% group_by(id) %>% summarise(n=n())
+  N_ENTITES_BY_ENTITY = ANSWER_ %>% group_by(entity) %>% summarise(n=n())
+
+  DFM= ANSWER_ %>% tidytext::cast_dfm(id, entity, n)
+  FCM = DFM %>% quanteda::fcm()
+  #)
+  N=quanteda::nfeat(DFM)
+  # TOP_N <- names(quanteda::topfeatures(DFM,decreasing = T,n = N))
+  # #TOP_N
+  # FCM_SELECT <- quanteda::fcm_select(FCM, pattern = TOP_N,
+  #                                    selection = "keep",
+  #                                    valuetype = "fixed")
+  FCM_SELECT <- quanteda::fcm_select(FCM, pattern = quanteda::featnames(DFM),
+                                     selection = "keep",
+                                     valuetype = "fixed")
+  if(nrow(FCM_SELECT)<5){return({
+    message("Error: Not enought entity mentions")
+    NULL}
+    )}
+  G = FCM_SELECT %>% quanteda.textplots::as.igraph(.,
+                                                   omit_isolated = F,
+                                                   weighted = T)
+  row.names(DBPEDIA_DICT)=DBPEDIA_DICT$entity
+  entities=DBPEDIA_DICT[names(V(G)),]
+  #Node attributes
+  G <- set_vertex_attr(G, "id", index = V(G), entities$entity)
+  G <- set_vertex_attr(G, "label", index = V(G), entities$label)
+  G <- set_vertex_attr(G, 'DBpedia', index = !is.na(entities$entityDB), "true")
+  G <- set_vertex_attr(G, 'DBpedia', index = is.na(entities$entityDB), "false")
+  G <- set_vertex_attr(G, 'DBpediaUrl', index = V(G), entities$entityDB)
+  G <- set_vertex_attr(G, 'group', index = is.na(entities$entityDB), NA)
+  G <- set_vertex_attr(G, 'occurences', index = V(G), featfreq(DFM))# add frequency of nodes
+  G <- set_vertex_attr(G, 'value', index = V(G), (featfreq(DFM))^(1/2))# add frequency of nodes
+  G <- set_vertex_attr(G, 'percentile', index = V(G), fmsb::percentile(featfreq(DFM))/100)
+  G <- set_vertex_attr(G, 'level', index = !is.na(entities$entityDB), 1)
+  G <- set_vertex_attr(G, 'shape', index = !is.na(entities$entityDB), "square")#
+ # G <- set_vertex_attr(G, 'shape', index = V(G), "text")#square
+  # G <- set_vertex_attr(G, 'scaling.label.enabled', index = !is.na(entities$entityDB), "true")
+  # G <- set_vertex_attr(G, 'scaling.label.max', index = !is.na(entities$entityDB), 50)
+  # G <- set_vertex_attr(G, 'scaling.label.min', index = !is.na(entities$entityDB), 25)
+  # G <- set_vertex_attr(G, 'scaling.label.maxVisible', index = !is.na(entities$entityDB), 50)
+  #G <- set_vertex_attr(G, 'collapse', index = is.na(entities$entityDB), T)
+  #G <- set_vertex_attr(G, 'type', index = V(G), NA)
+  #G <- set_vertex_attr(G, 'image', index = V(G), NA)
+  #G <- set_vertex_attr(G, 'shape', index = V(G), "circularImage")
+  #G <- set_vertex_attr(G, 'opacity', index = V(G), 0.5)
+  #G <- set_vertex_attr(G, "title", index = V(G), NA)
+  #Edge attributes
+  G <- set_edge_attr(G,"width",index = E(G),E(G)$weight^(1/2))
+  G <- set_edge_attr(G,"percentile",index = E(G),fmsb::percentile(E(G)$weight)/100)
+
+  #min edge cooccurrence filter
+  #G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F) # delete all edges that occurr only once should remove about 90% for big graphs
+
+  #target_nodes=100
+
+  if(igraph::vcount(G)>target_nodes){
+    threshold_nodes=1-(target_nodes/igraph::vcount(G))
+    G <-delete.vertices(graph = G,v = V(G)[V(G)$percentile<threshold_nodes])   # delete all entities that are not in the top 0.05 percentile
+  }
+
+  #percentile filter
+
+  if( igraph::graph.density(G)>0.25 & igraph::vcount(G)>25){
+    #igraph::ecount(G)/igraph::vcount(G)> 10*(target_nodes/100) |
+    # percentile=0.9
+    # power=4
+    V(G)$edge_threshold <- sapply(names(V(G)),function(x,Graph=G, p=percentile*(V(G)$percentile^power)){quantile(incident(Graph, x, mode = "all")$weight,probs = p, na.rm = FALSE,
+                                                                                                                 names = FALSE, digits = 7)})
+    filter_edges=function(x,Graph=G){
+      x=x
+      max(V(Graph)[as.vector(ends(Graph, E(Graph)[x], names=F)) ]$edge_threshold) >= E(Graph)[x]$weight
     }
 
-    N_ENTITIES_BY_ID = ANSWER_ %>% group_by(id) %>% summarise(n=n())
-    N_ENTITES_BY_ENTITY = ANSWER_ %>% group_by(entity) %>% summarise(n=n())
+    y=1:length(E(G))
+    E(G)$below_threshold =sapply(X = y, FUN = function(x){filter_edges(x)})
 
-    DFM= ANSWER_ %>% tidytext::cast_dfm(id, entity, n)
-    FCM = DFM %>% quanteda::fcm()
-    #)
-    N=quanteda::nfeat(DFM)
-    # TOP_N <- names(quanteda::topfeatures(DFM,decreasing = T,n = N))
-    # #TOP_N
-    # FCM_SELECT <- quanteda::fcm_select(FCM, pattern = TOP_N,
-    #                                    selection = "keep",
-    #                                    valuetype = "fixed")
-    FCM_SELECT <- quanteda::fcm_select(FCM, pattern = quanteda::featnames(DFM),
-                                       selection = "keep",
-                                       valuetype = "fixed")
-    if(nrow(FCM_SELECT)<5){return({
-      message("Error: Not enought entity mentions")
-      NULL}
-      )}
-    G = FCM_SELECT %>% quanteda.textplots::as.igraph(.,
-                                                     omit_isolated = F,
-                                                     weighted = T)
-    row.names(DBPEDIA_DICT)=DBPEDIA_DICT$entity
-    entities=DBPEDIA_DICT[names(V(G)),]
-    #Node attributes
-    G <- set_vertex_attr(G, "id", index = V(G), entities$entity)
-    G <- set_vertex_attr(G, "label", index = V(G), entities$label)
-    G <- set_vertex_attr(G, 'DBpedia', index = !is.na(entities$entityDB), "true")
-    G <- set_vertex_attr(G, 'DBpedia', index = is.na(entities$entityDB), "false")
-    G <- set_vertex_attr(G, 'DBpediaUrl', index = V(G), entities$entityDB)
-    G <- set_vertex_attr(G, 'group', index = is.na(entities$entityDB), NA)
-    G <- set_vertex_attr(G, 'occurences', index = V(G), featfreq(DFM))# add frequency of nodes
-    G <- set_vertex_attr(G, 'value', index = V(G), (featfreq(DFM))^(1/2))# add frequency of nodes
-    G <- set_vertex_attr(G, 'percentile', index = V(G), fmsb::percentile(featfreq(DFM))/100)
-    G <- set_vertex_attr(G, 'level', index = !is.na(entities$entityDB), 1)
-    G <- set_vertex_attr(G, 'shape', index = !is.na(entities$entityDB), "square")#
-   # G <- set_vertex_attr(G, 'shape', index = V(G), "text")#square
-    # G <- set_vertex_attr(G, 'scaling.label.enabled', index = !is.na(entities$entityDB), "true")
-    # G <- set_vertex_attr(G, 'scaling.label.max', index = !is.na(entities$entityDB), 50)
-    # G <- set_vertex_attr(G, 'scaling.label.min', index = !is.na(entities$entityDB), 25)
-    # G <- set_vertex_attr(G, 'scaling.label.maxVisible', index = !is.na(entities$entityDB), 50)
-    #G <- set_vertex_attr(G, 'collapse', index = is.na(entities$entityDB), T)
-    #G <- set_vertex_attr(G, 'type', index = V(G), NA)
-    #G <- set_vertex_attr(G, 'image', index = V(G), NA)
-    #G <- set_vertex_attr(G, 'shape', index = V(G), "circularImage")
-    #G <- set_vertex_attr(G, 'opacity', index = V(G), 0.5)
-    #G <- set_vertex_attr(G, "title", index = V(G), NA)
-    #Edge attributes
-    G <- set_edge_attr(G,"width",index = E(G),E(G)$weight^(1/2))
-    G <- set_edge_attr(G,"percentile",index = E(G),fmsb::percentile(E(G)$weight)/100)
-
-    #min edge cooccurrence filter
-    #G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F) # delete all edges that occurr only once should remove about 90% for big graphs
-
-    #target_nodes=100
-
-    if(igraph::vcount(G)>target_nodes){
-      threshold_nodes=1-(target_nodes/igraph::vcount(G))
-      G <-delete.vertices(graph = G,v = V(G)[V(G)$percentile<threshold_nodes])   # delete all entities that are not in the top 0.05 percentile
+    G <- subgraph.edges(G, E(G)[!E(G)$below_threshold], delete.vertices = T)
+    if(igraph::graph.density(G)>0.25){
+    G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F)
     }
 
-    #percentile filter
-
-    if( igraph::graph.density(G)>0.25){
-      #igraph::ecount(G)/igraph::vcount(G)> 10*(target_nodes/100) |
-      # percentile=0.9
-      # power=4
-      G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F)
-      V(G)$edge_threshold <- sapply(names(V(G)),function(x,Graph=G, p=percentile*(V(G)$percentile^power)){quantile(incident(Graph, x, mode = "all")$weight,probs = p, na.rm = FALSE,
-                                                                                                                   names = FALSE, digits = 7)})
-      filter_edges=function(x,Graph=G){
-        x=x
-        max(V(Graph)[as.vector(ends(Graph, E(Graph)[x], names=F)) ]$edge_threshold) >= E(Graph)[x]$weight
-      }
-
-      y=1:length(E(G))
-      E(G)$below_threshold =sapply(X = y, FUN = function(x){filter_edges(x)})
-
-      G <- subgraph.edges(G, E(G)[!E(G)$below_threshold], delete.vertices = T)
-    }
-    #remove isolated nodes
-    Isolated = which(degree(G)==0)
-    G = delete.vertices(G, Isolated)
-    #
-    NETWORK=G %>%
-      visNetwork::visIgraph(
-        .,
-        idToLabel = FALSE,
-        physics = T
-        #,type = "square"
-      ) %>% visNetwork::visEdges(
-        dashes = F,
-        arrows ="",
-        smooth =list(enabled=T,roundness=1,type="discrete"),
-        scaling = list(min=0.25,max=3.5),
-        color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")#color = "lightgray"
-        ) %>%
-      visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
-      visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
-                 =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
-      visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
-      visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
-                             manipulation = list(enabled = TRUE,deleteNode = FALSE, deleteEdge = FALSE,
-                                                 editEdgeCols = c("title"),
-                                                 editNodeCols = c("title","color")),
-                             nodesIdSelection = list(enabled = T),
-                             highlightNearest = list(enabled = T),
-                             height = "600px",#"fit-content"
-                             width = "100%",
-                             autoResize = T
+  }
+  #remove isolated nodes
+  Isolated = which(degree(G)==0)
+  G = delete.vertices(G, Isolated)
+  #
+  NETWORK=G %>%
+    visNetwork::visIgraph(
+      .,
+      idToLabel = FALSE,
+      physics = T
+      #,type = "square"
+    ) %>% visNetwork::visEdges(
+      dashes = F,
+      arrows ="",
+      smooth =list(enabled=T,roundness=1,type="discrete"),
+      scaling = list(min=0.25,max=3.5),
+      color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")#color = "lightgray"
       ) %>%
-      visEvents(doubleClick =
-                  "function(params) {
-    var nodeID = params.nodes[0];
-    var DBpediaUrl = this.body.nodes[nodeID].options.DBpediaUrl;
-    window.open(DBpediaUrl, '_blank');
-   }")
-    list(answer_final=ANSWER_,network_vis=NETWORK,igraph=G,dbpedia_dict=DBPEDIA_DICT, n_feat=N,n_ent_by_id= N_ENTITIES_BY_ID, n_ent_by_ent=N_ENTITES_BY_ENTITY)
+    visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
+    visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
+               =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
+    visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
+    visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
+                           manipulation = list(enabled = TRUE,deleteNode = FALSE, deleteEdge = FALSE,
+                                               editEdgeCols = c("title"),
+                                               editNodeCols = c("title","color")),
+                           nodesIdSelection = list(enabled = T),
+                           highlightNearest = list(enabled = T),
+                           height = "600px",#"fit-content"
+                           width = "100%",
+                           autoResize = T
+    ) %>%
+    visEvents(doubleClick =
+                "function(params) {
+  var nodeID = params.nodes[0];
+  var DBpediaUrl = this.body.nodes[nodeID].options.DBpediaUrl;
+  window.open(DBpediaUrl, '_blank');
+ }")
+  list(answer_final=ANSWER_,network_vis=NETWORK,igraph=G,dbpedia_dict=DBPEDIA_DICT, n_feat=N,n_ent_by_id= N_ENTITIES_BY_ID, n_ent_by_ent=N_ENTITES_BY_ENTITY)
+}
+content_extraction=function (x, as = NULL, type = NULL, encoding = NULL, ...) {
+  type <- type %||% x$headers[["Content-Type"]] %||% mime::guess_type(x$url,
+                                                                      empty = "application/octet-stream")
+  as <- as %||% httr:::parseability(type)
+  as <- match.arg(as, c("raw", "text", "parsed"))
+  if (httr:::is.path(x$content)) {
+    raw <- httr::  readBin(x$content, "raw", file.info(x$content)$size)
   }
+  else {
+    raw <- x$content
+  }
+  switch(as, raw = raw, text = parse_text(raw, type, encoding),
+         parsed = httr:::parse_auto(raw, type, encoding, ...))
+}
+
+
+query_and_build_net_pagination=function(target_nodes_=100,
+                             filter_=NA,
+                             ENTITY="",
+                             START_DATE="2018-01-01",
+                             END_DATE="2024-01-01" ,
+                             N_THRESHOLD=2,
+                             OFFSET=0,
+                             N_LIMIT=10000){
+
+  #parameters for testing purpose
+  # target_nodes_=100
+  # filter_="Netherlands"
+  # START_DATE="2018-01-01"
+  # END_DATE="2024-01-01"
+  # N_THRESHOLD=2
+  #OFFSET=0
+  #N_LIMIT=0
+
+  require(httr)
+  require(tidytext)
+  require(tidyverse)
+  require(quanteda)
+  require(igraph)
+  require(visNetwork)
+
 
   PREFIX='
 PREFIX observatory: <https://www.w3id.org/okg/obio-ontology/>
@@ -279,7 +328,7 @@ SELECT ?id ?entity ?entityDB ?date_time ?sentiment ?like ?retweet ?polarity ?sub
 WHERE {
     ?id schema:mentions ?entityMention ;
         dc:created ?date_time .
-    ?entity nif:anchorOf ?entityMention .
+    ?entity nif:anchorOf ?entityMention . ::CONTAINSENTITY::
     ?id observatory:sentiment_label ?sentiment .
     ?id observatory:nb_like ?like .
     ?id observatory:polarity_score ?polarity .
@@ -287,28 +336,127 @@ WHERE {
     ?id observatory:nb_repost ?retweet .
     OPTIONAL {?entity nee:hasMatchedURL ?entityDB .}
           FILTER (
-        "::START_DATE::"^^xsd:dateTime < ?date_time &&  # start date
-          ?date_time < "::END_DATE::"^^xsd:dateTime)   # end date
+        "::START_DATE::"^^xsd:dateTime < ?date_time &&
+          ?date_time < "::END_DATE::"^^xsd:dateTime ::CONTAINSENTITYFILTER::)
 }
 GROUP BY ?id ?entity ?entityDB  ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity
-ORDER BY ?date_time
-limit ::N_LIMIT::
+ORDER BY ?date_time ?id ?entity ?entityDB
+::N_LIMIT:: ::OFFSET::'
+EMPTY=F
+MYREQUEST=list()
+COUNTER=1
+while(!EMPTY){
+
+  MYREQUEST[[COUNTER]]=REQUEST(
+    QUERY_=QUERY,
+    PREFIX_=PREFIX,
+    API_KEY_ =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")),
+    START_DATE_=START_DATE,
+    END_DATE_=END_DATE,
+    ENTITY_=ENTITY,
+    TIMEOUT_=60,
+    N_THRESHOLD_=N_THRESHOLD,
+    N_LIMIT_ = N_LIMIT,
+    OFFSET_ = OFFSET,
+    ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql")
+  print(paste0("PAGINATION_COUNTER:",COUNTER))
+  print(paste0("NROWS:",length(content_extraction(MYREQUEST[[COUNTER]]))))
+  #if(COUNTER>4){EMPTY=T}
+  if(length(content_extraction(MYREQUEST[[COUNTER]]))<N_LIMIT){EMPTY=T}
+  #if(!is.data.frame(content(MYREQUEST[[COUNTER]],flatten = T, simplifyDataFrame=T,simplifyVector=T))){EMPTY=T}
+  COUNTER=COUNTER+1
+  OFFSET=OFFSET+N_LIMIT
+}
+MYREQUEST
+
+}
+
+query_and_build_net=function(target_nodes_=100,
+                             filter_="",
+                             START_DATE="2018-01-01",
+                             END_DATE="2024-01-01" ,
+                             N_THRESHOLD=2,
+                             OFFSET=0,
+                             N_LIMIT=10000){
+ENTITY=filter_
+  #parameters for testing purpose
+  # target_nodes_=100
+  # filter_="Netherlands"
+  # START_DATE="2018-01-01"
+  # END_DATE="2024-01-01"
+  # N_THRESHOLD=2
+  #OFFSET=0
+  #N_LIMIT=0
+
+  require(httr)
+  require(tidytext)
+  require(tidyverse)
+  require(quanteda)
+  require(igraph)
+  require(visNetwork)
+
+
+  PREFIX='
+PREFIX observatory: <https://www.w3id.org/okg/obio-ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+PREFIX nee: <http://www.ics.forth.gr/isl/oae/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX dc: <http://purl.org/dc/terms/>
+PREFIX earmark: <http://www.essepuntato.it/2008/12/earmark>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#>
+PREFIX ex: <http://example.com>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wsj: <https://w3id.org/framester/wsj/>
+PREFIX pbdata: <https://w3id.org/framester/pb/pbdata/>
+PREFIX pbschema: <https://w3id.org/framester/pb/pbschema/>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 '
-MYREQUEST=REQUEST(QUERY_ = QUERY,
-               PREFIX_ = PREFIX,
-               START_DATE_ =START_DATE,
-               END_DATE_=END_DATE ,
-               N_THRESHOLD_=N_THRESHOLD,
-               N_LIMIT_ = N_LIMIT,
-               ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql"
-               ,API_KEY_ =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
-               ,RESOURCE_=NA)
 
-#ANSWER=content(MYREQUEST)
+  QUERY =
+    '
+SELECT ?id ?entity ?entityDB ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity (COUNT(?id) as ?n)
+WHERE {
+    ?id schema:mentions ?entityMention ;
+        dc:created ?date_time .
+    ?entity nif:anchorOf ?entityMention . ::CONTAINSENTITY::
+    ?id observatory:sentiment_label ?sentiment .
+    ?id observatory:nb_like ?like .
+    ?id observatory:polarity_score ?polarity .
+    ?id observatory:subjectivity_score ?subjectivity .
+    ?id observatory:nb_repost ?retweet .
+    OPTIONAL {?entity nee:hasMatchedURL ?entityDB .}
+          FILTER (
+        "::START_DATE::"^^xsd:dateTime < ?date_time &&
+          ?date_time < "::END_DATE::"^^xsd:dateTime ::CONTAINSENTITYFILTER::)
+}
+GROUP BY ?id ?entity ?entityDB  ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity
+ORDER BY ?date_time ?id ?entity ?entityDB
+::N_LIMIT:: ::OFFSET::'
+
+MYREQUEST=REQUEST(QUERY_=QUERY,
+                  PREFIX_=PREFIX,
+                  ENTITY_=ENTITY,
+                  API_KEY_ =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")),
+                  START_DATE_=START_DATE,
+                  END_DATE_=END_DATE,
+                  TIMEOUT_=60,
+                 # RESOURCE_=RESOURCE,
+                  N_THRESHOLD_=N_THRESHOLD,
+                  N_LIMIT_ = N_LIMIT,
+                 OFFSET_ = OFFSET,
+                ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql")
+ANSWER=content(MYREQUEST)
 if(!is.data.frame(content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T))){return()}
-
 ANSWER=content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
-results=build_net(ANSWER_  = ANSWER,target_nodes = target_nodes_,filter = filter_)
+results=build_net(ANSWER_  = ANSWER,
+                  target_nodes = target_nodes_
+                  #,filter = filter_
+                  )
 #saveRDS(results,file = paste0("results",Sys.Date(),".RDS"))
 results[["my_request"]]=list()
 results[["my_request"]][["url"]]= MYREQUEST$url %>% URLdecode()
@@ -443,14 +591,14 @@ Finally, case studies can help to highlight the diversity of experiences of mult
      valueExpr = {
        if (TRUE) {
          return(withProgress({
-           setProgress(message = "Sending SPARQL query to OKG <br>Please wait...")
+           setProgress(message = "Sending SPARQL query to OKG. Please wait...")
            print(paste0("START_DATE: ",input$dateRange2[1]))
            print(paste0("END_DATE: ",input$dateRange2[2]))
            print(paste0("filter_: ",input$entityfilter))
            print(paste0("target_nodes_: ",input$slider_nentites))
            print(paste0("N_LIMIT: ",input$slider_nmaxrows))
 
-           myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = input$slider_nmaxrows,START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+           myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = as.integer(input$slider_nmaxrows),START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
 
         #if(myresult=="Error: Not enought entity mentions") return(NULL)
            #n_unique=length(unique(myresult$n_ent_by_id$id))
@@ -691,7 +839,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
    #})
 
    output$render_tweet1_sample <-   renderUI(
-     {column(width = 8,
+    {column(width = 8,
                        tagList(
                          tags$blockquote(class = "twitter-tweet",
                                          tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[1])))
