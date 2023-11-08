@@ -324,7 +324,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                 )
               ))
             ),
-            ######Body item 2: DO ######
+            ######Body item 2: DO - Bird Eye View ######
             tabItem(tabName = "DO",
                     fluidRow(
                       box(
@@ -345,7 +345,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               collapsed = F,
                               fluidRow(
                                 column(width = 3,
-                                       downloadButton('downloadNetwork',
+                                       downloadButton('downloadNetwork_BE',
                                                       label = "Download",class = "mx-2",
                                                       icon = shiny::icon("download"),width = "100px")
                                 ),
@@ -381,7 +381,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             bs4Dash::box(
                               title = "Sample of Tweets matching Query",
                               width = 12,collapsed = T,
-                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (gray squares: no more retrievable posts or posts hidden for privacy compliance; Not found: posts that have been delated by their author and posts from accounts that don't exist anymore)</i>"),
+                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (gray squares : posts from accounts that don't exist any more or hidden for privacy compliance; Not found! : posts that have been delated by their author)</i>"),
                               #div(uiOutput("render_tweets_sample")),
                               div(fluidRow(uiOutput("render_tweet1_sample"),
                                            uiOutput("render_tweet2_sample"),
@@ -438,7 +438,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                           )
                         #)#check here
                       ))),
-                    ######Body item 3: NF ######
+                    ######Body item 3: NF - Fine Graned Analysis ######
                     tabItem(tabName = "NF",
                             fluidRow(
                               box(
@@ -734,7 +734,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
               #visNetworkOutput("result",height = "600px",width = "100%"),
               HTML("<hr>"),
               div(style='display:inline-block',
-              fluidRow(column(width = 6,HTML("<b>Step 1</b><br>"),               shiny::actionButton("sparqltaskBE", "Run/Update: Bird's-eye Network",icon = shiny::icon("map"))),
+              fluidRow(column(width = 6,HTML("<b>Step 1</b><br>"),               shiny::actionButton("sparqltaskBE", "Run/Update: Bird's-eye Network",icon = shiny::icon("map")),
+                              downloadButton("downloadFGData","Download data")),
                        column(width = 6,HTML("<b>Step 2</b><br>"),                 shiny::actionButton("sparqltaskFG", "Run/Update: Fine Grained View",icon = shiny::icon("binoculars")))
                 ),
               #actionButton(inputId = 'run',label =  'Run',style='font-size:110%; display:center-align'),

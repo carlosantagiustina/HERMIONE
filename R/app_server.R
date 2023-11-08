@@ -29,6 +29,7 @@ initial_server_parameters <- list(
 )
 
 #### FUNCTIONS ####
+##### Functions for Bird's Eye View #####
 REQUEST= function(QUERY_,
                   PREFIX_,
                   ENDPOINT_,
@@ -111,7 +112,7 @@ print(MY_QUERY)
   REQUEST
 }
 
-#### DEFINE  FUNCTION TO BUILD BIRD EYE NETWORK ####
+###### Function to build Bird Eye Network ######
 build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
                    power=4,filter=NA){
 ## Parameters for testing
@@ -259,6 +260,8 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
  }")
   list(answer_final=ANSWER_,network_vis=NETWORK,igraph=G,dbpedia_dict=DBPEDIA_DICT, n_feat=N,n_ent_by_id= N_ENTITIES_BY_ID, n_ent_by_ent=N_ENTITES_BY_ENTITY)
 }
+
+#function to extract content from stacked httr resuts inserted in list
 content_extraction=function (x, as = NULL, type = NULL, encoding = NULL, ...) {
   type <- type %||% x$headers[["Content-Type"]] %||% mime::guess_type(x$url,
                                                                       empty = "application/octet-stream")
@@ -468,7 +471,521 @@ results[["my_request"]][["times"]]= MYREQUEST$times
 results
 }
 
+##### Functions for FineGrained analysis ####
 
+
+REQUEST_FG= function(QUERY_,
+                     PREFIX_,
+                     ENDPOINT_=ENDPOINT,
+                     API_KEY_=API_KEY,
+                     START_DATE_=START_DATE,
+                     END_DATE_=END_DATE,
+                     ENTITY_=ENTITY,
+                     ENTITY_1_=ENTITY_1,
+                     ENTITY_2_=ENTITY_2,
+                     TIMEOUT_=30,
+                     #RESOURCE_=RESOURCE,
+                     N_THRESHOLD_=2,
+                     N_LIMIT_=0,
+                     OFFSET_=0){
+  #PASTE PREFIXES AND QUERY
+  MY_QUERY=paste0(PREFIX_,QUERY_)
+
+  require(httr)
+  require(tidytext)
+  require(tidyverse)
+
+  #SOBSTITUTE PARAMETERS IF ANY
+  if(!is.na(START_DATE_) && grepl(pattern = "[:][:]START[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::START_DATE::",START_DATE_,ignore.case = F,x=.)
+  }
+  if(!is.na(END_DATE_) && grepl(pattern = "[:][:]END[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::END_DATE::",END_DATE_,ignore.case = F,x=.)
+  }
+  if(!is.na(N_THRESHOLD_) && grepl(pattern = "[:][:]N_THRESHOLD[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::N_THRESHOLD::",N_THRESHOLD_,ignore.case = F,x=.)
+  }
+  if(!is.na(ENTITY_1_) && grepl(pattern = "[:][:]ENTITY_1[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::ENTITY_1::",ENTITY_1_,ignore.case = F,x=.)
+  }
+  if(!is.na(ENTITY_2_) && grepl(pattern = "[:][:]ENTITY_2[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::ENTITY_2::",ENTITY_2_,ignore.case = F,x=.)
+  }
+
+  print(MY_QUERY)
+  print(paste0("N_LIMIT_: ",N_LIMIT_))
+  print(paste0("OFFSET_: ",OFFSET_))
+  print(paste0("N_LIMIT_: ",N_LIMIT_))
+  print(paste0("OFFSET_: ",OFFSET_))
+
+  if( is.numeric(N_LIMIT_) && N_LIMIT_>0){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::N_LIMIT::",gsub("[.]$","",x = paste0("LIMIT ",format(N_LIMIT_, scientific = F))),ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::N_LIMIT::","",ignore.case = F,x=.)
+  }
+
+  if( !(is.na(ENTITY_) | ENTITY_=="")){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::CONTAINSENTITYFILTER::",
+           paste0('&&
+            regex(?entity2,"',gsub(" ","_",ENTITY_),'", "i")'),ignore.case = F,x=.)
+    MY_QUERY = MY_QUERY %>%
+      gsub("::CONTAINSENTITY::","
+      ?id schema:mentions ?entityMention2 .
+    ?entity2 nif:anchorOf ?entityMention2 .",ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITYFILTER::","",ignore.case = F,x=.)
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITY::","",ignore.case = F,x=.)
+  }
+
+  if( is.numeric(OFFSET_) && OFFSET_>0){
+    MY_QUERY = MY_QUERY %>%
+      gsub("::OFFSET::",gsub("[.]$","",x = paste0("\nOFFSET ",format(OFFSET_, scientific = F))),ignore.case = F,x=.)
+  }else{
+    MY_QUERY = MY_QUERY %>% gsub("::OFFSET::","",ignore.case = F,x=.)
+  }
+
+  print(MY_QUERY)
+  #RUN REQUEST_FG
+  REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
+                    query=list("query"=MY_QUERY),
+                    add_headers(
+                      #"Accept"= "text/csv"
+                      "Accept"= "application/json"
+                      ,"Authorization" = paste('Bearer',
+                                               API_KEY_,
+                                               sep=" ")
+                    )
+  )
+
+  REQUEST
+}
+
+selected_entities=c("<http://dbpedia.org/resource/Racism>","<http://dbpedia.org/resource/Economic_inequality>")
+#<http://dbpedia.org/resource/Racism>  <http://dbpedia.org/resource/Economic_inequality>
+QUERY_FG =
+  '
+SELECT DISTINCT ?ent1 ?entityDB1 ?entityMention1 ?ent2 ?entityDB2 ?entityMention2 ?date  ?id ?token ?word ?pos ?index ?dep_prop ?token_dep ?index_dep ?word_dep  ?entity ?entityDB ?refers_to ?tokenrole ?arg
+WHERE {
+  ?id schema:mentions ?entityMention1 .
+  ?ent1 nif:anchorOf ?entityMention1 ;
+        nee:hasMatchedURL ?entityDB1 .
+  ?ent1 nee:hasMatchedURL ::ENTITY_1:: .
+  ?id schema:mentions ?entityMention2 .
+  ?ent2 nif:anchorOf ?entityMention2 ;
+        nee:hasMatchedURL ?entityDB2 .
+  ?ent2 nee:hasMatchedURL ::ENTITY_2:: .
+  ?id dc:created ?date .
+  ?id  nif:sentence ?sentence .
+  ?sentence nif:word ?token .
+  ?token nif:lemma ?word .
+  ?token nif:posTag ?pos .
+  ?token observatory:hasTokenIndex ?index .
+  OPTIONAL{?token nif:superString ?refers_to .
+           ?entity nif:anchorOf ?refers_to ;
+                   nee:hasMatchedURL ?entityDB .}
+    OPTIONAL{?dep_prop rdfs:subPropertyOf observatory:dependency_relation .
+  ?token_dep ?dep_prop ?token .
+  ?token_dep observatory:hasTokenIndex ?index_dep .
+  ?token_dep rdf:value ?word_dep .}
+    OPTIONAL{ ?role_inst wsj:onRoleSet ?tokenrole ;
+                       observatory:onToken ?token ;
+                       wsj:withmappedrole ?arg . }
+}
+ORDER BY DESC(?id)
+limit 1000
+'
+PREFIX_FG='
+PREFIX observatory: <https://www.w3id.org/okg/obio-ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+PREFIX nee: <http://www.ics.forth.gr/isl/oae/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX dc: <http://purl.org/dc/terms/>
+PREFIX earmark: <http://www.essepuntato.it/2008/12/earmark>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#>
+PREFIX ex: <http://example.com>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wsj: <https://w3id.org/framester/wsj/>
+PREFIX pbdata: <https://w3id.org/framester/pb/pbdata/>
+PREFIX pbschema: <https://w3id.org/framester/pb/pbschema/>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+'
+
+fg_analysis=function(QUERY=QUERY_FG,
+                     ENTITY_1,
+                     ENTITY_2,
+                     PREFIX=PREFIX_FG,
+                     API_KEY =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")),
+                     START_DATE,
+                     END_DATE,...){
+
+  library(visNetwork)
+  library(igraph)
+  library(httr)
+  library(tidytext)
+  library(tidyverse)
+  #PARAMS
+  # ENTITY_1 = "<http://dbpedia.org/resource/Donald_Trump>"
+  # ENTITY_2 = "<http://dbpedia.org/resource/Economic_inequality>"
+  # START_DATE = "2018-01-01"
+  # END_DATE = "2024-01-01"
+  # API_KEY =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
+  # QUERY=QUERY_FG
+  # PREFIX=PREFIX_FG
+  # API_KEY =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
+
+  #using lemma as word:   ?token rdf:value ?word .
+  #  ?token nif:lemma ?lemma . #removed lemma because there are some errors (mismatches)
+  #GROUP BY ?ent1 ?entityDB1 ?entityMention1 ?ent2 ?entityDB2 ?entityMention2 ?date ?id ?token ?lemma ?word ?pos ?index ?dep_prop ?token_dep ?index_dep ?word_dep ?refers_to ?entity
+  selected_entities=c(ENTITY_1,ENTITY_2)
+
+  ANSWER=REQUEST_FG(TIMEOUT_ = 120,QUERY_ = QUERY,ENTITY_1_ = ENTITY_1,ENTITY_2_ = ENTITY_2,PREFIX_ = PREFIX,API_KEY_ = API_KEY,START_DATE_ = START_DATE,END_DATE_ = END_DATE,ENDPOINT_  = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql",N_THRESHOLD_ = NA,ENTITY_ = NA)
+  ANSWER = content(ANSWER,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
+  #ANSWER =as.data.frame(lapply(ANSWER, function(x)   type.convert(x, as.is=TRUE)), stringsAsFactors=FALSE)
+  #ANSWER %>% View()
+  #write_csv(ANSWER,file = "example_query_answer.csv")
+  ANSWER_BKP=ANSWER
+  #sample=unique(ANSWER$id) %>% sample(.,5)
+  #ANSWER=ANSWER[ANSWER$id %in% sample,]
+
+  ANSWER = ANSWER %>% mutate(token_clean=gsub(pattern="^[^%]{1,}[%]{1}[2][3]",replacement="",x=token,perl = T))
+  ANSWER =ANSWER %>% arrange(.,desc(id),index)
+  ANSWER=ANSWER[!is.na(ANSWER[,c("word")]),]
+
+  #ANSWER=ANSWER[!duplicated(ANSWER[,"token"]),]
+
+  ENTITY_TOKEN_DICT_A= ANSWER[,c(1:3)]
+  ENTITY_TOKEN_DICT_A=ENTITY_TOKEN_DICT_A[!duplicated(ENTITY_TOKEN_DICT_A),]
+  colnames(ENTITY_TOKEN_DICT_A)=c("entity","entityDB" ,"entityMention")
+
+  ENTITY_TOKEN_DICT_B= ANSWER[,c(4:6)]
+  ENTITY_TOKEN_DICT_B=ENTITY_TOKEN_DICT_B[!duplicated(ENTITY_TOKEN_DICT_B),]
+  colnames(ENTITY_TOKEN_DICT_B)=c("entity","entityDB" ,"entityMention")
+
+  ENTITY_TOKEN_DICT_C= ANSWER[,c(17:19)]
+  ENTITY_TOKEN_DICT_C=ENTITY_TOKEN_DICT_C[!duplicated(ENTITY_TOKEN_DICT_C),]
+  colnames(ENTITY_TOKEN_DICT_C)=c("entity","entityDB" ,"entityMention")
+
+  ENTITY_TOKEN_DICT=rbind(ENTITY_TOKEN_DICT_A,ENTITY_TOKEN_DICT_B,ENTITY_TOKEN_DICT_C)
+
+  colnames(ENTITY_TOKEN_DICT)=c("label","entity","id")
+  ENTITY_TOKEN_DICT=ENTITY_TOKEN_DICT[!is.na(ENTITY_TOKEN_DICT$label),]
+  ENTITY_TOKEN_DICT=ENTITY_TOKEN_DICT[!duplicated(ENTITY_TOKEN_DICT),]
+
+  EDGE_DB_tokens=ANSWER[!(is.na(ANSWER$word_dep) | ANSWER$pos=="PUNCT"),c("token","token_dep","id","dep_prop")]
+
+  colnames(EDGE_DB_tokens)=c("from","to","tweet_id","title")
+  EDGE_DB_tokens$title=gsub(pattern = "https://www.w3id.org/okg/obio-ontology/dep_rel_",replacement = "",EDGE_DB_tokens$title)
+  EDGE_DB_tokens$type="dep_rel"
+  EDGE_DB_tokens$id=paste0(EDGE_DB_tokens$from,"-",EDGE_DB_tokens$type,":",EDGE_DB_tokens$title,"-",EDGE_DB_tokens$to)
+  EDGE_DB_tokens$color="#E5E4E2"
+    EDGE_DB_tokens$hidden=F
+
+    EDGE_DB_entities=ANSWER[!(ANSWER$pos=="PUNCT" |is.na(ANSWER$refers_to)),c("refers_to","token","id","word")]
+    colnames(EDGE_DB_entities)=c("from","to","tweet_id","title")
+    EDGE_DB_entities$type="refers_to"
+    EDGE_DB_entities$id=paste0(EDGE_DB_entities$from,"-",EDGE_DB_entities$type,":",EDGE_DB_entities$title,"-",EDGE_DB_entities$to)
+    EDGE_DB_entities$color="#BF616A"
+      EDGE_DB_entities$hidden=F
+
+      EDGE_DB_frames=ANSWER[!is.na(ANSWER$tokenrole) ,c("token","arg","id","tokenrole")]
+      colnames(EDGE_DB_frames)=c("from","to","tweet_id","type")
+      EDGE_DB_frames$title=gsub("^https://w3id.org/framester/pb/data/|^http://example.org/muhai/observatory#roleset/|[.][0-9]{1,}$",replacement = "",EDGE_DB_frames$type)
+      EDGE_DB_frames$type="frame"
+      EDGE_DB_frames$id=paste0(EDGE_DB_frames$from,"-",EDGE_DB_frames$type,":",EDGE_DB_frames$title,"-",EDGE_DB_frames$to)
+      EDGE_DB_frames$color="#C1E3ED"
+        EDGE_DB_frames$hidden=F
+
+        VERTICES_DB_frames_roots=tibble(id=unique(EDGE_DB_frames$title) ,
+                                        label=unique(EDGE_DB_frames$title),
+                                        tweet_id=NA,
+                                        group=NA,
+                                        shape="circle",
+                                        color=c("#C1E3ED"),
+                                        hidden=F,
+                                        level=NA
+                                        #,url=gsub("^[<]?|[>]?$","",selected_entities)
+        )
+        EDGE_DB_frames_roots=eval(parse(text=paste0("tibble(",paste0(colnames(EDGE_DB_frames),"=NA",collapse = ", "),", .rows =",  length( which( EDGE_DB_frames$title %in% VERTICES_DB_frames_roots$label))*2,")")))
+        EDGE_DB_frames_roots=as.data.frame(EDGE_DB_frames_roots)
+        #####
+        EDGE_DB_frames_roots$from=rep(EDGE_DB_frames$title,2)
+        EDGE_DB_frames_roots$to=c(EDGE_DB_frames$from,EDGE_DB_frames$to)
+        EDGE_DB_frames_roots$tweet_id=rep(EDGE_DB_frames$tweet_id,2)
+        EDGE_DB_frames_roots$title=EDGE_DB_frames_roots$from
+        EDGE_DB_frames_roots$type="SelectedFrame"
+        EDGE_DB_frames_roots$color="rgba(255,255,255, 0)"
+        EDGE_DB_frames_roots$id= paste0(EDGE_DB_frames_roots$from,"-",EDGE_DB_frames_roots$type,":",EDGE_DB_frames_roots$title,"-",EDGE_DB_frames_roots$to)
+        EDGE_DB_frames_roots$hidden=F
+
+        #####
+        EDGE_DB=rbind(EDGE_DB_tokens,EDGE_DB_entities, EDGE_DB_frames,EDGE_DB_frames_roots)
+
+        EDGE_DB=EDGE_DB[!(is.na(EDGE_DB$from)|is.na(EDGE_DB$to)),]
+        EDGE_DB=EDGE_DB[!duplicated(EDGE_DB),]
+
+        ANSWER_ND=ANSWER[!duplicated(ANSWER$token),]
+
+
+
+        rownames(ANSWER_ND)=ANSWER_ND$token
+        VERTICES_DB_tokens= ANSWER_ND[unique(c(EDGE_DB$from,EDGE_DB$to)),c("token","word","id")]
+        colnames(VERTICES_DB_tokens)=c("id","label","tweet_id")
+        VERTICES_DB_tokens=VERTICES_DB_tokens[!is.na(VERTICES_DB_tokens$id),]
+        VERTICES_DB_tokens$group=paste0("word_", VERTICES_DB_tokens$tweet_id)
+        VERTICES_DB_tokens$shape="text"
+        VERTICES_DB_tokens$color="black"
+          VERTICES_DB_tokens$hidden=FALSE
+          VERTICES_DB_tokens$level=({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = VERTICES_DB_tokens$tweet_id) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = VERTICES_DB_tokens$id) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = VERTICES_DB_tokens$id) %>% as.factor() %>% as.numeric()})+1))*1.5
+
+          VERTICES_DB_entities= data.frame(ANSWER_ND[!is.na(ANSWER_ND$refers_to) & !duplicated(ANSWER_ND$refers_to),c("refers_to", "id")])
+          colnames(VERTICES_DB_entities)=c("id","tweet_id")
+          VERTICES_DB_entities=left_join(VERTICES_DB_entities,ENTITY_TOKEN_DICT[,-c(1)],by="id")
+          colnames(VERTICES_DB_entities)[3]=c("label")
+          VERTICES_DB_entities=VERTICES_DB_entities[c("id","label","tweet_id")]
+          VERTICES_DB_entities$group=paste0("entity_", VERTICES_DB_entities$tweet_id)
+          VERTICES_DB_entities$label=gsub("^http://dbpedia.org/resource/","",VERTICES_DB_entities$label)
+          VERTICES_DB_entities$label=gsub("_"," ",VERTICES_DB_entities$label)
+          VERTICES_DB_entities$shape="box"
+          VERTICES_DB_entities$color="#BF616A"
+            VERTICES_DB_entities$hidden=F
+            VERTICES_DB_entities$level=2
+            #VERTICES_DB_entities$selectible=F
+
+            VERTICES_DB_entities_roots=tibble(id=selected_entities,
+                                              label=gsub("_"," ",gsub("^[<]?http://dbpedia.org/resource/|[>]?$","",selected_entities)),
+                                              tweet_id=NA,
+                                              group=NA,
+                                              shape="circle",
+                                              color=c("#bdd9bf","#ffc857"),
+                                              hidden=F
+                                              #,url=gsub("^[<]?|[>]?$","",selected_entities)
+            )
+
+            #EDGES_DB_entities_roots=eval(parse(text=paste0("tibble(",paste0(colnames(EDGE_DB),paste0("=",sapply(EDGE_DB, class),"()"),collapse = ", "),", .rows =",  length( which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label)),")")))
+
+
+            EDGES_DB_entities_roots=eval(parse(text=paste0("tibble(",paste0(colnames(EDGE_DB),"=NA",collapse = ", "),", .rows =",  length( which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label)),")")))
+            EDGES_DB_entities_roots=as.data.frame(EDGES_DB_entities_roots)
+
+            EDGES_DB_entities_roots$from[1:length( which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[1]))]=VERTICES_DB_entities_roots$id[1]
+
+            EDGES_DB_entities_roots[1:length( which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[1])),c("to","tweet_id","title")]=VERTICES_DB_entities[which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[1]),c("id","tweet_id","label")]
+
+            EDGES_DB_entities_roots$from[(length(which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[1]))+1):nrow(EDGES_DB_entities_roots)]=VERTICES_DB_entities_roots$id[2]
+            EDGES_DB_entities_roots[(length( which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[1]))+1):nrow(EDGES_DB_entities_roots),c("to","tweet_id","title")]=VERTICES_DB_entities[which(VERTICES_DB_entities$label %in% VERTICES_DB_entities_roots$label[2]),c("id","tweet_id","label")]
+            EDGES_DB_entities_roots$type="SelectedEntity"
+            EDGES_DB_entities_roots$color="rgba(255,255,255, 0)"
+            EDGES_DB_entities_roots$id= paste0(EDGES_DB_entities_roots$from,"-",EDGES_DB_entities_roots$type,":",EDGES_DB_entities_roots$title,"-",EDGES_DB_entities_roots$to)
+            EDGES_DB_entities_roots$hidden=F
+
+            #VERTICES_DB_entities_roots$label=VERTICES_DB_entities_roots$id
+            VERTICES_DB_entities_roots$level=0.5
+            VERTICES_DB=rbind(VERTICES_DB_tokens,VERTICES_DB_entities, VERTICES_DB_entities_roots,VERTICES_DB_frames_roots)
+
+            rownames(VERTICES_DB)=VERTICES_DB$id
+
+            EDGE_DB=rbind(EDGE_DB,EDGES_DB_entities_roots)
+
+            #EDGE_DB[EDGE_DB$from %in% EDGES_DB_entities_roots$to[EDGES_DB_entities_roots$from==selected_entities[1]],"from"]=selected_entities[1]
+            #EDGE_DB[EDGE_DB$from %in% EDGES_DB_entities_roots$to[EDGES_DB_entities_roots$from==selected_entities[2]],"from"]=selected_entities[2]
+            #VERTICES_DB=VERTICES_DB[!(VERTICES_DB$id %in% EDGES_DB_entities_roots$to),]
+
+            EDGE_DB=EDGE_DB[EDGE_DB$from %in% VERTICES_DB$id & EDGE_DB$to %in% VERTICES_DB$id, ]
+
+            GRAPH= graph_from_data_frame(d = EDGE_DB, directed = TRUE, vertices =VERTICES_DB)
+
+            paths1=all_simple_paths(
+              GRAPH,
+              from = c(selected_entities[1]),
+              to = c(selected_entities[2]),#,VERTICES_DB_entities$id
+              mode = c("all")
+            )
+
+            paths2=all_simple_paths(
+              GRAPH,
+              from = c(selected_entities[2]),
+              to = c(selected_entities[1]),#,VERTICES_DB_entities$id
+              mode = c("all")
+            )
+
+            neighbors1= sapply(VERTICES_DB_entities$id, function(x) neighbors(GRAPH,x , mode = c("all"))) %>% unname() %>% unlist() %>% names()
+
+            neighbors2=sapply(neighbors1, function(x) neighbors(GRAPH,x , mode = c("all"))) %>% unname() %>% unlist() %>% names()
+
+            neighbors3=sapply(neighbors2, function(x) neighbors(GRAPH,x , mode = c("all"))) %>% unname() %>% unlist() %>% names()
+
+            SUBGRAPH=subgraph(GRAPH, unique(c(EDGE_DB_frames$from[EDGE_DB_frames$from %in% VERTICES_DB$id],EDGE_DB_frames$to[EDGE_DB_frames$to %in% VERTICES_DB$id], neighbors1,neighbors2, neighbors3,names(unlist(paths1)),names(unlist(paths2))) ))
+            #SUBGRAPH=subgraph(GRAPH, unique(c(neighbors1,neighbors2, neighbors3,names(unlist(paths1)),names(unlist(paths2))) ))
+
+            components <- igraph::clusters(SUBGRAPH, mode="weak")
+            biggest_cluster_id <- which.max(components$csize)
+
+            # ids
+            vert_ids <- V(SUBGRAPH)[components$membership == biggest_cluster_id]
+
+            # subgraph
+            SUBGRAPH=igraph::induced_subgraph(SUBGRAPH, vert_ids)
+            #vertex_attr(SUBGRAPH,"level")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],value = max(vertex_attr(SUBGRAPH,"level"),na.rm = T)+1)
+
+
+
+            ancestor <- function(g, vs) {
+              da <- subset(colSums(distances(g, mode = "out")[vs, ]), !names(V(g)) %in% vs)
+              if (all(is.infinite(da))) {
+                return("None")
+              }
+              names(which(da == min(da)))
+            }
+            paths_roots=ancestor(SUBGRAPH,c(selected_entities[1],selected_entities[2]))
+
+            #Subset graph keeping Tweets with direct paths between entities
+
+            n_tweets=length(unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name"))))))
+
+            #vertex_attr(SUBGRAPH,"name")[grepl(pattern = "http://example[.]com/ent_",x = vertex_attr(SUBGRAPH,"name"))]
+            if(n_tweets>7 & length(paths_roots)>=6){
+              SUBGRAPH=subgraph(SUBGRAPH, c(selected_entities,vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],vertex_attr(SUBGRAPH,"name")[gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name")) %in%  gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",paths_roots)]))
+
+              #vertex_attr(SUBGRAPH,"level",index = grepl("http://example.com/token_",x = vertex_attr(SUBGRAPH,"name")))
+
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")),value = ({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],value = max(({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)+1)
+            }
+
+            n_tweets=length(unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name"))))))
+            if(n_tweets>7){
+              sample=gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",paths_roots)[1:6]
+              #which(is.na(sample))
+              sample_add= unique(setdiff(x = gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name")))),y=sample[which(!is.na(sample))]))
+
+              if(length(sample_add)<length(which(is.na(sample)))){
+                sample[which(is.na(sample))]= c(sample_add, rep(NA,length(which(is.na(sample)))-length(sample_add)))
+              }else{
+                sample[which(is.na(sample))]= sample(sample_add,length(which(is.na(sample))))
+              }
+
+              sample=sample[!is.na(sample)]
+
+              SUBGRAPH=subgraph(SUBGRAPH, c(selected_entities,vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],vertex_attr(SUBGRAPH,"name")[gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name")) %in%  sample]))
+
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")),value = ({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],value = max(({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)+1)
+            }
+
+            components <- igraph::clusters(SUBGRAPH, mode="weak")
+            biggest_cluster_id <- which.max(components$csize)
+
+            # ids
+            vert_ids <- V(SUBGRAPH)[components$membership == biggest_cluster_id]
+
+            # subgraph
+            SUBGRAPH=igraph::induced_subgraph(SUBGRAPH, vert_ids)
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],25)
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="NOUN"],"white")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.background", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="NOUN"],"#006ddb")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="NOUN"],15)
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="ADJ"|ANSWER$pos=="ADV"],"white")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.background", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="ADJ"|ANSWER$pos=="ADV"],"#b66dff")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="ADJ"|ANSWER$pos=="ADV"],15)
+
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="VERB"],"white")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.background", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="VERB"],"black")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name") %in% ANSWER$token[ANSWER$pos=="VERB"],15)
+
+
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = selected_entities, 25)#change size of selected entities
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index =vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_entities$id,"white")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index =vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_entities$id,15)
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.background", index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% paths_roots], "black")
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index = EDGE_DB_entities$to[EDGE_DB_entities$to %in% vertex_attr(SUBGRAPH,"name")],"white")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = EDGE_DB_entities$to[EDGE_DB_entities$to %in% vertex_attr(SUBGRAPH,"name")],15)
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.background", index = EDGE_DB_entities$to[EDGE_DB_entities$to %in% vertex_attr(SUBGRAPH,"name")],"#BF616A")
+
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.color", index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% paths_roots],"yellow")
+            SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% paths_roots], 20)
+
+            #plot(GRAPH)
+            plot=SUBGRAPH %>%
+              visNetwork::visIgraph(igraph = .,
+                                    idToLabel = FALSE,
+                                    physics = T) %>%
+              visNetwork::visEdges(
+                dashes = T,
+                arrows ="middle",
+                smooth =list(enabled=F,roundness=0,type="discrete"),
+                scaling = list(min=0.15,max=4),
+                color = list(highlight = "#BF616A",
+                             hover = "goldenrod4",
+                             opacity=0.5)
+              )%>%
+              visNetwork::visNodes(color = list(highlight = list(border="#ffc100"),
+                                                hover = list(border="goldenrod",background='#ffc100')
+              )
+              ,scaling = list(min= 40,
+                              max= 100,
+                              label=list(enabled=T,min= 60, max= 90,maxVisible= 150,drawThreshold= 1)
+              )
+              ) %>%
+              visNetwork::visInteraction(multiselect = T,
+                                         navigationButtons = T,
+                                         hover=F,
+                                         dragView = T,
+                                         dragNodes = F,
+                                         selectable =  T)    %>%
+              visNetwork::visOptions(manipulation = FALSE,selectedBy = list(variable="tweet_id", multiple="true"),
+                                     nodesIdSelection = list(enabled = F),
+                                     height = "600px",#"fit-content"
+                                     width = "100%",
+                                     autoResize = T,
+                                     highlightNearest = list(enabled = T,
+                                                             degree = 20,
+                                                             hover = F,
+                                                             algorithm="hierarchical",
+                                                             labelOnly = F),
+                                     collapse = list(enabled = TRUE,
+                                                     clusterOptions = list(shape = "text"))) %>%
+              visHierarchicalLayout(direction="UD",parentCentralization = F,nodeSpacing = 150,levelSeparation = 110,blockShifting = F,sortMethod = "directed") %>%
+              visNetwork::visPhysics(solver = "hierarchicalRepulsion",
+                                     hierarchicalRepulsion =list(
+                                       nodeDistance=130,
+                                       avoidOverlap=1,
+                                       springLength=50,
+                                       centralGravity=0.15,
+                                       springConstant=0.05,
+                                       onlyDynamicEdges=T),
+                                     minVelocity=5,
+                                     maxVelocity = 5,
+                                     stabilization = list(enabled=T),
+                                     enabled = T,
+                                     adaptiveTimestep = T
+                                     ,wind=list(y=5)
+              )
+            return(list(visualization=plot,graph=SUBGRAPH, data=ANSWER_BKP))
+}
+
+
+#reactive_sparqlentresult=query_and_build_net()
 
 #### SERVER FUNCTION ####
 app_server <- function(input, output, session) {
@@ -668,7 +1185,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      visNetworkProxy("birdresult") %>% visGetPositions()
    })
 
-   nodes_positions <- reactive({
+   nodes_positions_BE <- reactive({
      positions <- input$network_positions
      if(!is.null(positions)){
        nodes_positions <- do.call("rbind", lapply(positions, function(x){ data.frame(x = x$x, y = x$y)}))
@@ -679,12 +1196,12 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      }
    })
    #Handle network download
-   output$downloadNetwork <- downloadHandler(
+   output$downloadNetwork_BE <- downloadHandler(
      filename = function() {
        paste('network-', Sys.Date(),"_filter",input$entityfilter,"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
      },
      content = function(con) {
-       nodes_positions <- nodes_positions()
+       nodes_positions <- nodes_positions_BE()
        net_data <- as_data_frame(reactive_sparqlentresult()$igraph, what = "both")
        if(!is.null(nodes_positions)){
          nodes_save <- merge(net_data$vertices, nodes_positions, by = "id", all = T)
@@ -959,15 +1476,26 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      }
    )
    #browser()
+
+   output$downloadFGData <- downloadHandler(
+     filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_finegrained_data_HERMIONE.csv')
+     ,
+     content = function(file) {
+       readr::write_csv(reactive_sparqlentresult()$answer_final, file)
+     }
+   )
+
+
+
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
    output$FG_entity_1 <- renderUI({
      selectInput("TW_search_summary_variable",
-                 "Variable:",
+                 "Selected entity A:",
                  choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Economic inequality" ,selectize = TRUE)
    })
    output$FG_entity_2 <- renderUI({
      selectInput("TW_search_summary_variable",
-                 "Variable:",
+                 "Selected entity B:",
                  choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Inflation", selectize = TRUE)
    })
 
