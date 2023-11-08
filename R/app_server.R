@@ -650,20 +650,22 @@ fg_analysis=function(QUERY=QUERY_FG,
   #GROUP BY ?ent1 ?entityDB1 ?entityMention1 ?ent2 ?entityDB2 ?entityMention2 ?date ?id ?token ?lemma ?word ?pos ?index ?dep_prop ?token_dep ?index_dep ?word_dep ?refers_to ?entity
   selected_entities=c(ENTITY_1,ENTITY_2)
 
-  ANSWER=REQUEST_FG(TIMEOUT_ = 120,QUERY_ = QUERY,ENTITY_1_ = ENTITY_1,ENTITY_2_ = ENTITY_2,PREFIX_ = PREFIX,API_KEY_ = API_KEY,START_DATE_ = START_DATE,END_DATE_ = END_DATE,ENDPOINT_  = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql",N_THRESHOLD_ = NA,ENTITY_ = NA)
-  ANSWER = content(ANSWER,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
-  #ANSWER =as.data.frame(lapply(ANSWER, function(x)   type.convert(x, as.is=TRUE)), stringsAsFactors=FALSE)
-  #ANSWER %>% View()
-  #write_csv(ANSWER,file = "example_query_answer.csv")
+  MYREQUEST=REQUEST_FG(TIMEOUT_ = 120,QUERY_ = QUERY,ENTITY_1_ = ENTITY_1,ENTITY_2_ = ENTITY_2,PREFIX_ = PREFIX,API_KEY_ = API_KEY,START_DATE_ = START_DATE,END_DATE_ = END_DATE,ENDPOINT_  = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql",N_THRESHOLD_ = NA,ENTITY_ = NA)
+
+  ANSWER = tryCatch({
+    content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
+    },
+                    error=function(e){showModal(modalDialog(paste("Error:","The number of posts mentioning the two selected entities is insufficient or null.  Network cannot be built, please select another pair of entities."),,easyClose = TRUE))},
+                  warning=function(w) {}
+    )
+  if(!is.data.frame(ANSWER )){
+    return()
+  }
   ANSWER_BKP=ANSWER
-  #sample=unique(ANSWER$id) %>% sample(.,5)
-  #ANSWER=ANSWER[ANSWER$id %in% sample,]
 
   ANSWER = ANSWER %>% mutate(token_clean=gsub(pattern="^[^%]{1,}[%]{1}[2][3]",replacement="",x=token,perl = T))
   ANSWER =ANSWER %>% arrange(.,desc(id),index)
   ANSWER=ANSWER[!is.na(ANSWER[,c("word")]),]
-
-  #ANSWER=ANSWER[!duplicated(ANSWER[,"token"]),]
 
   ENTITY_TOKEN_DICT_A= ANSWER[,c(1:3)]
   ENTITY_TOKEN_DICT_A=ENTITY_TOKEN_DICT_A[!duplicated(ENTITY_TOKEN_DICT_A),]
@@ -981,7 +983,15 @@ fg_analysis=function(QUERY=QUERY_FG,
                                      adaptiveTimestep = T
                                      ,wind=list(y=5)
               )
-            return(list(visualization=plot,graph=SUBGRAPH, data=ANSWER_BKP))
+
+            results=list(visualization=plot,graph=SUBGRAPH, data=ANSWER_BKP)
+            results[["url"]]= MYREQUEST$url %>% URLdecode()
+            results[["status_code"]]= MYREQUEST$status_code
+            results[["headers"]]= MYREQUEST$headers
+            results[["request"]]= MYREQUEST$request
+            results[["date"]]= MYREQUEST$date
+            results[["times"]]= MYREQUEST$times
+            return(results)
 }
 
 
@@ -1493,10 +1503,14 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
 
 
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
+   #FG_entity_1 <- reactiveVal("Health equity")
+   #FG_entity_2 <- reactiveVal("Racism")
+
+
    output$FG_entity_1 <- renderUI({
      selectInput("myFG_entity_1",
                  "Selected entity A:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Health equity" ,selectize = TRUE)
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected =  "Health equity",selectize = TRUE)
    })
    output$FG_entity_2 <- renderUI({
      selectInput("myFG_entity_2",
@@ -1506,6 +1520,33 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
 #browser()
    FG_entity_1 <- reactive({input$myFG_entity_1 })
    FG_entity_2 <- reactive({input$myFG_entity_2 })
+
+
+   output$FG_entity_11 <- renderUI({
+     req(FG_entity_1())
+     myFG_entity_1=FG_entity_1()
+     selectInput("myFG_entity_11",
+                 "Selected entity A:",
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_1 ,selectize = TRUE)
+   })
+   output$FG_entity_22 <- renderUI({
+     req(FG_entity_2())
+     myFG_entity_2=FG_entity_2()
+     selectInput("myFG_entity_22",
+                 "Selected entity B:",
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_2, selectize = TRUE)
+   })
+
+   observeEvent(input$myFG_entity_11, {
+     req(input$myFG_entity_11)
+     updateSelectInput(session, "myFG_entity_1", selected = input$myFG_entity_11)
+   })
+
+   observeEvent(input$myFG_entity_22, {
+     req(input$myFG_entity_22)
+     updateSelectInput(session,  "myFG_entity_2", selected = input$myFG_entity_22)
+   })
+
 #browser()
 
    reactive_sparqlentresult_FG = eventReactive(
@@ -1522,9 +1563,6 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
            setProgress(message = "FG component sending SPARQL query to OKG. Please wait...")
            print(paste0("START_DATE: ",input$dateRange2[1]))
            print(paste0("END_DATE: ",input$dateRange2[2]))
-           #print(paste0("filter_: ",input$entityfilter))
-           #print(paste0("target_nodes_: ",input$slider_nentites))
-           #print(paste0("N_LIMIT: ",input$slider_nmaxrows))
            entity1=FG_entity_1()
            entity2=FG_entity_2()
            #browser()

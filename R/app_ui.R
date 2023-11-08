@@ -458,6 +458,12 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 width = 12,
                                 collapsed = F,
                                 fluidRow(
+                                  column(width = 6,
+                                         uiOutput(outputId = "FG_entity_1")),
+                                  column(width = 6,
+                                         uiOutput(outputId = "FG_entity_2"))
+                                ),
+                                fluidRow(
                                   column(width = 3
                                          # ,downloadButton('downloadNetwork',
                                          #                label = "Download",class = "mx-2",
@@ -851,8 +857,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
 ",
                 width = 12,
               #  footer = "Advanced parameters for tweeking HERMIONE",
-              uiOutput(outputId = "FG_entity_1"),
-              uiOutput(outputId = "FG_entity_2")
+              uiOutput(outputId = "FG_entity_11"),
+              uiOutput(outputId = "FG_entity_22")
 
               )
             )
