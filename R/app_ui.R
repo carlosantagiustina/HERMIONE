@@ -328,7 +328,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
             tabItem(tabName = "DO",
                     fluidRow(
                       box(
-                        title = h1("Bird's-eye Network"),
+                        title = h1("Bird's-Eye Network"),
                         closable = F,
                         maximizable = TRUE,
                         collapsible = TRUE,
@@ -339,7 +339,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                           sortable(
                             width = 12,
                             bs4Dash::box(
-                              title = "  Network visualization & exploration",
+                              title = "  BE network visualization & exploration",
                               icon =icon( "map"),
                               width = 12,
                               collapsed = F,
@@ -374,7 +374,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                                   status="info")
                             )
                             ),
-                                  visNetworkOutput("birdresult",
+                                  visNetworkOutput("BEresult",
                                                    height = "650px",
                                                    width = "100%")
                             ),
@@ -439,32 +439,111 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                         #)#check here
                       ))),
                     ######Body item 3: NF - Fine Graned Analysis ######
-                    tabItem(tabName = "NF",
-                            fluidRow(
-                              box(
-                                title = h1("Fine Grained View"),
-                                closable = TRUE,
-                                maximizable = TRUE,
-                                collapsible = TRUE,
+            tabItem(tabName = "NF",
+                    fluidRow(
+                      box(
+                        title = h1("Fine Grained View"),
+                        closable = F,
+                        maximizable = TRUE,
+                        collapsible = TRUE,
+                        width = 12,
+                        solidHeader = FALSE,
+                        div(
+                          fluidRow(
+                            sortable(
+                              width = 12,
+                              bs4Dash::box(
+                                title = "  FG network visualization & exploration",
+                                icon =icon( "binoculars"),
                                 width = 12,
-                                solidHeader = FALSE,
-                                div(
-                                  fluidRow(
-                                    sortable(
-                                      width = 12,
-                                  infoBox(width = 12,
-                                          title = "",
-                                          icon =icon( "binoculars"),
-                                          value = HTML(
-                                  "<h4>We here zoom-in on a pair of entities connected in the bird's-eye graph. This view extends the more general and impartial knowledge included in KGs with the aggregated perspectives from social media posts. Both the semantic information that can be gained from the tweets in the form of semantic embeddings, as well as the syntactic structure of the tweet, is taken into account. <br>
-                                  Using this information, the subgraph of a given entity pair is extended with additional nodes containing different characterizations of each entity, and the edge between them is split apart into a number of paths that show different ways in which people understand the relationship between the two selected entities.</h4>"
-                                ),color="primary"),
-                                htmlOutput("html_1")
+                                collapsed = F,
+                                fluidRow(
+                                  column(width = 3
+                                         # ,downloadButton('downloadNetwork',
+                                         #                label = "Download",class = "mx-2",
+                                         #                icon = shiny::icon("download"),width = "100px")
+                                  ),
+                                  column(width = 3
+                                         , actionButton(inputId = "runFG",
+                                                      label = "Run",
+                                                      icon = shiny::icon("gears"),
+                                                      class = "mx-2",
+                                                      width = "100px",
+                                                      status="danger")
+                                  ),
+                                  column(width = 3
+                                          ,actionButton(inputId = "controlbarToggleFG",
+                                                       label = "Control",
+                                                       icon = shiny::icon("sliders"),
+                                                       class = "mx-2",
+                                                       width = "100px",
+                                                       status = "warning")
+                                  ),
+                                  column(width = 3
+                                         ,actionButton(inputId = "infobarToggleFG",
+                                                      label = "Info",
+                                                      icon = shiny::icon("info"),
+                                                      class = "mx-2",
+                                                      width = "100px",
+                                                      status="info")
+                                  )
                                 )
-                                )
-                                )
+                                 ,visNetworkOutput("FGresult",
+                                                  height = "650px",
+                                                  width = "100%")
+                              ),
+                              bs4Dash::box(
+                                title = "Sample of Tweets matching Query",
+                                width = 12,collapsed = T,
+                                HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (gray squares : posts from accounts that don't exist any more or hidden for privacy compliance; Not found! : posts that have been delated by their author)</i>")
+                                #,div(uiOutput("render_tweets_sample")),
+                                # div(fluidRow(uiOutput("render_tweet1_sample"),
+                                #              uiOutput("render_tweet2_sample"),
+                                #              uiOutput("render_tweet3_sample"),
+                                #              uiOutput("render_tweet4_sample"),
+                                #              uiOutput("render_tweet5_sample"),
+                                #              uiOutput("render_tweet6_sample"),
+                                #              uiOutput("render_tweet7_sample"),
+                                #              uiOutput("render_tweet8_sample"),
+                                #              uiOutput("render_tweet9_sample"),
+                                #              uiOutput("render_tweet10_sample"),
+                                #              uiOutput("render_tweet11_sample"),
+                                #              uiOutput("render_tweet12_sample")
+                                # ))
+                                #, footer = "Advanced parameters for tweeking HERMIONE"
                               )
-                            )),
+                              # ,bs4Dash::box(
+                              #   title = "SPARQL Queries Log",
+                              #   width = 12,collapsed = T,
+                              #    div(
+                              #      uiOutput("sparqlqueryURL"),
+                              #      style="font-size: 12px;")
+                              #    #, footer = "Advanced parameters for tweeking HERMIONE"
+                              #  )
+                              ,color="primary")
+                          )),
+                        sidebar = boxSidebar(
+                          startOpen = FALSE,
+                          icon = icon( "info"),
+                          id = "FG_info",
+                          background = "darkgray"
+                            ,fluidRow(
+                              {
+                                tags$div(HTML(
+                                  "<h3>Network description and navigation information</h3><br>We here zoom-in on a pair of entities connected in the bird's-eye graph. This view extends the more general and impartial knowledge included in KGs with the aggregated perspectives from social media posts. Both the semantic information that can be gained from the tweets in the form of semantic embeddings, as well as the syntactic structure of the tweet, is taken into account. <br>
+                                  Using this information, the subgraph of a given entity pair is extended with additional nodes containing different characterizations of each entity, and the edge between them is split apart into a number of paths that show different ways in which people understand the relationship between the two selected entities."),
+                                  tags$ul(
+                                    tags$li(tags$span("Node size is proportional to the number of occurrences of the entity")),
+                                    tags$li(tags$span("Edge width is proportional to the number of occurrences of the entity")),
+                                    tags$li(tags$span("The shape depends on the type of entity")))
+                                  #,uiOutput("tweet_example")
+                                )
+                              }
+
+                            )
+                        )
+                        #)#check here
+                      ))),
                     ###### Body item 4: cases ####
                     tabItem(tabName = "cases",
                             fluidRow(column(

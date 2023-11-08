@@ -1108,7 +1108,7 @@ Finally, case studies can help to highlight the diversity of experiences of mult
      valueExpr = {
        if (TRUE) {
          return(withProgress({
-           setProgress(message = "Sending SPARQL query to OKG. Please wait...")
+           setProgress(message = "BE component sending SPARQL query to OKG. Please wait...")
            print(paste0("START_DATE: ",input$dateRange2[1]))
            print(paste0("END_DATE: ",input$dateRange2[2]))
            print(paste0("filter_: ",input$entityfilter))
@@ -1154,7 +1154,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      HTML(text = sparqlLog())
    })
 
-   reactive_bird_network = reactive({
+   reactive_BE_network = reactive({
      req(reactive_sparqlentresult())
      myresult<-reactive_sparqlentresult()
      myresult$network_vis %>%
@@ -1167,7 +1167,7 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
    }
    )
 
-   output$birdresult <-renderVisNetwork(reactive_bird_network())
+   output$BEresult <-renderVisNetwork(reactive_BE_network())
 
    #Provide information about selected node
    output$return_BE_node <- renderPrint({
@@ -1273,9 +1273,14 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
    shiny::observeEvent(input$controlbarToggleBE, {
      updateControlbar(id = "controlbar")
    })
-
+   shiny::observeEvent(input$controlbarToggleFG, {
+     updateControlbar(id = "controlbar")
+   })
    shiny::observeEvent(input$infobarToggleBE, {
      updateSidebar(id = "BE_info")
+   })
+   shiny::observeEvent(input$infobarToggleFG, {
+     updateSidebar(id = "FG_info")
    })
 
   # output$BEnetwork <- renderVisNetwork({
@@ -1489,15 +1494,94 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
 
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
    output$FG_entity_1 <- renderUI({
-     selectInput("TW_search_summary_variable",
+     selectInput("myFG_entity_1",
                  "Selected entity A:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Economic inequality" ,selectize = TRUE)
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Health equity" ,selectize = TRUE)
    })
    output$FG_entity_2 <- renderUI({
-     selectInput("TW_search_summary_variable",
+     selectInput("myFG_entity_2",
                  "Selected entity B:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Inflation", selectize = TRUE)
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Racism", selectize = TRUE)
    })
+#browser()
+   FG_entity_1 <- reactive({input$myFG_entity_1 })
+   FG_entity_2 <- reactive({input$myFG_entity_2 })
+#browser()
+
+   reactive_sparqlentresult_FG = eventReactive(
+     eventExpr = {
+       (input$sparqltaskFG  | input$runFG)  # add other condition that triggers query
+     },
+     ignoreNULL = TRUE,
+     ignoreInit = TRUE,
+     valueExpr = {
+       req(FG_entity_1())
+       req(FG_entity_2())
+       if (TRUE) {
+         return(withProgress({
+           setProgress(message = "FG component sending SPARQL query to OKG. Please wait...")
+           print(paste0("START_DATE: ",input$dateRange2[1]))
+           print(paste0("END_DATE: ",input$dateRange2[2]))
+           #print(paste0("filter_: ",input$entityfilter))
+           #print(paste0("target_nodes_: ",input$slider_nentites))
+           #print(paste0("N_LIMIT: ",input$slider_nmaxrows))
+           entity1=FG_entity_1()
+           entity2=FG_entity_2()
+           #browser()
+           print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity1),">"))
+           print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity2),">"))
+
+
+           myresultFG= fg_analysis(ENTITY_1 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_1()),">"),
+                                 ENTITY_2 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_2()),">"),
+                                 START_DATE = input$dateRange2[1],
+                                 END_DATE = input$dateRange2[2])
+           if(is.null(myresultFG)){return(NULL)}
+           # if(length(myresultFG)>=3){
+           #   random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresultFG$n_ent_by_id$id))))
+           # }
+           myresultFG
+         },
+         min = 0,
+         max = 2,
+         value = 1
+         ))}
+     }
+   )
+
+   reactive_FG_network = reactive({
+     req(reactive_sparqlentresult_FG())
+     myresult<-reactive_sparqlentresult_FG()
+     myresult$visualization
+     # %>%
+     #   visEvents(hoverNode = "function(nodes) {
+     #            Shiny.onInputChange('current_node_id', nodes);
+     #          ;}") %>%
+     #   visEvents(hoverEdge = "function(edges) {
+     #            Shiny.onInputChange('current_edge_id', edges);
+     #          ;}")
+   }
+   )
+
+   output$FGresult <-renderVisNetwork(reactive_FG_network())
+   #reactive_sparqlentresult_FG()$visualization
+
+   # observeEvent(eventExpr = {
+   #   (input$sparqltaskFG | input$runFG)
+   #   #&& reactive_sparqlentresult()!=# add other condition that triggers query
+   # },{
+   #   req(reactive_sparqlentresult())
+   #   sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
+   # }
+   # )
+
+   #Sample tweets for selected entity
+   observeEvent(eventExpr = is.character(input$current_node_id$node) && input$current_node_id$node!="" ,{
+     # require(input$current_node_id$node)
+     myresult= reactive_sparqlentresult()
+     random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node]))))
+   }
+   )
 
   ##### COMPONENT 3: SUMMARY STATS #####
 
