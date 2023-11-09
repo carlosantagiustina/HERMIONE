@@ -243,7 +243,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
     visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
     visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
                =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
-    visNetwork::visInteraction(multiselect = F, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
+    visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
     visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
                            manipulation = list(enabled = TRUE,deleteNode = FALSE, deleteEdge = FALSE,
                                                editEdgeCols = c("title"),
