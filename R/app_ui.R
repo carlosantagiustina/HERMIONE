@@ -793,22 +793,22 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                     position: relative;"
                 ,
                    fluidRow(
-                   column(width = 5,offset = 0,
+                   column(width = 6,offset = 0,
                    img(
                      src = "www/hermione/0_smile.png",
                      style = "display: block;
-                              float:right;
+                              float:left;
                               width:100%;
-                              min-width : 100px;
+                              min-width : 200px;
                               max-width : 200px;
                               margin-left:0%;
                               margin-right:-12%;"
                    )),
                    column(width = 6,offset = 0,br(),
-                   span(div(textyle(tags$p("Hi, here below you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool.Click Next > to continue"),delay = "100",duration = "100",color = "black", class = "ex1"),id="iphermione"),
+                   span(div(uiOutput("controlroom_text"),id="iphermione"),
                         style = "
                         position: relative;
-                        min-width : 150px;"
+                        min-width : 200px;"
 
                    ),   br(),
                    fluidRow(align = 'right',div(

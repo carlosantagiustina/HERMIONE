@@ -237,7 +237,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
       dashes = F,
       arrows ="",
       smooth =list(enabled=T,roundness=1,type="discrete"),
-      scaling = list(min=0.25,max=3.5),
+      scaling = list(min=0.5,max=3.5),
       color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")#color = "lightgray"
       ) %>%
     visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
@@ -871,7 +871,7 @@ fg_analysis=function(QUERY=QUERY_FG,
             n_tweets=length(unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name"))))))
 
             #vertex_attr(SUBGRAPH,"name")[grepl(pattern = "http://example[.]com/ent_",x = vertex_attr(SUBGRAPH,"name"))]
-            if(n_tweets>7 && length(paths_roots)>=6){
+            if(n_tweets>=7 && exists("paths_roots") &&  length(paths_roots)>=7){
               SUBGRAPH=subgraph(SUBGRAPH, c(selected_entities,vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],vertex_attr(SUBGRAPH,"name")[gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name")) %in%  gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",paths_roots)]))
 
               #vertex_attr(SUBGRAPH,"level",index = grepl("http://example.com/token_",x = vertex_attr(SUBGRAPH,"name")))
@@ -881,7 +881,8 @@ fg_analysis=function(QUERY=QUERY_FG,
             }
 
             n_tweets=length(unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name"))))))
-            if(n_tweets>7){
+
+            if(n_tweets>=7 && exists("paths_roots") &&  length(paths_roots)>=1){
               sample=gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",paths_roots)[1:6]
               #which(is.na(sample))
               sample_add= unique(setdiff(x = gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name")))),y=sample[which(!is.na(sample))]))
@@ -900,6 +901,18 @@ fg_analysis=function(QUERY=QUERY_FG,
               SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],value = max(({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)+1)
             }
 
+            if(n_tweets>=7){
+              sample_add=unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name")))))
+
+              sample= sample(sample_add,min(6,length(sample_add)))
+
+              SUBGRAPH=subgraph(SUBGRAPH, c(selected_entities,vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],vertex_attr(SUBGRAPH,"name")[gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name")) %in%  sample]))
+
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")),value = ({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)
+              SUBGRAPH=set_vertex_attr(SUBGRAPH,"level",index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],value = max(({gsub(pattern =  "http://example[.]com/tweet_",replacement ="",x = vertex_attr(SUBGRAPH,"tweet_id",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() +0.75 })*1.5 + (gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric() / (max({gsub(pattern =  "^.*%23",replacement ="",x = vertex_attr(SUBGRAPH,"name",index = grepl("http://example[.]com/token_",x = vertex_attr(SUBGRAPH,"name")))) %>% as.factor() %>% as.numeric()})+1))*1.5)+1)
+            }
+
+
             components <- igraph::clusters(SUBGRAPH, mode="weak")
             biggest_cluster_id <- which.max(components$csize)
 
@@ -908,6 +921,7 @@ fg_analysis=function(QUERY=QUERY_FG,
 
             # subgraph
             SUBGRAPH=igraph::induced_subgraph(SUBGRAPH, vert_ids)
+
 
             SUBGRAPH=set_vertex_attr(SUBGRAPH, "font.size", index = vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],25)
 
@@ -1006,8 +1020,14 @@ fg_analysis=function(QUERY=QUERY_FG,
             results[["times"]]= MYREQUEST$times
             return(results)
 }
-hermione_controlroom_text=c("",
-                            ""
+
+##### Hermione Controlroom text ####
+
+hermione_controlroom_text=c("Hi, here below you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool. Click Next > to continue...",
+                            "Text 2",
+                            "Text 3",
+                            "Text 4",
+                            "NF Text 5"
                             )
 
 #reactive_sparqlentresult=query_and_build_net()
@@ -1021,7 +1041,7 @@ app_server <- function(input, output, session) {
   sparql_queries_BE_n <- reactiveValues(value_BE_n=0)
   sparql_queries_FG_n <- reactiveValues(value_FG_n=0)
   hermione_flags <- reactiveValues(intro=0,methods=0,cases=0, DO=0,NF=0,info=0)
-  hermione_controlroom_tutorial_n <- reactiveValues(value_tut_n=0)
+  hermione_controlroom <- reactiveValues(step=1)
 
   random_tweet_ids<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
   sparqlLog <-reactiveVal("")
@@ -1038,8 +1058,40 @@ app_server <- function(input, output, session) {
 #
 #     }
 # )
+
   output$html_2 <- renderUI(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")))
-  ##### HERMIONE AVATAR IMAGE FILES ####
+
+  ##### HERMIONE ####
+
+  ##### HERMIONE CONTROLROOM #####
+  #next step
+  observeEvent(eventExpr =  input$Hnext ,{
+    req(input$Hnext)
+    if(hermione_controlroom$step<length(hermione_controlroom_text)){
+      hermione_controlroom$step=hermione_controlroom$step+1
+    }
+    if(hermione_controlroom$step>1 & hermione_controlroom$step<5){
+      updateTabsetPanel(session, "current_tab", selected = "DO")
+    }
+    if(hermione_controlroom$step>4){
+      updateTabsetPanel(session, "current_tab", selected = "NF")
+    }
+
+
+  }
+  )
+  #previous step
+  observeEvent(eventExpr = input$Hpre ,{
+    req(input$Hpre)
+    if(hermione_controlroom$step>1){
+      hermione_controlroom$step=hermione_controlroom$step-1
+    }
+
+  }
+  )
+  output$controlroom_text=renderUI({textyle(tags$p(hermione_controlroom_text[hermione_controlroom$step]),delay = "100",duration = "100",color = "black", class = "ex1")})
+
+  ###### HERMIONE AVATAR IMAGE FILES ####
   hermione_avatar=
     c("<img src='https://avataaars.io/?avatarStyle=Transparent&topType=Turban&accessoriesType=Round&hatColor=Blue03&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=RaisedExcitedNatural&mouthType=Twinkle&skinColor=Light'
      />",
@@ -1049,8 +1101,8 @@ app_server <- function(input, output, session) {
         />",
       "<img src='https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairShortCurly&accessoriesType=Round&hairColor=Auburn&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=RaisedExcitedNatural&mouthType=Twinkle&skinColor=Light'
         />")
-  #### LISTEN INPUT CHANGES ####
-  ####search for tweets#####
+  ###### LISTEN INPUT CHANGES ####
+  ######search for tweets#####
 
   # Listen_search <- reactive({
   #   input$condition==1})
@@ -1069,7 +1121,7 @@ app_server <- function(input, output, session) {
                        tags$a(href = "https://twitter.com/twitter/status/1277996661520859136")),
        tags$script('twttr.widgets.load(document.getElementById("tweet"));')
      )})
-   ##### HERMIONE SERVER ####
+   ###### HERMIONE SERVER ####
    ###### Hermione: at Intro ####
    observeEvent(input$current_tab, {
      if (input$current_tab == "intro" && hermione_flags$intro==0) {
@@ -1077,8 +1129,8 @@ app_server <- function(input, output, session) {
        showModal(modalDialog(
          title = "Welcome to the I.O. & HERMIONE!",
          list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                             HTML("<center>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide while exploring MUHAI's Inequality Observatory.<br>
-        If you need help during your journey just click my icon on the buttom of the screen..."))),
+                             HTML("nter>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide on this journey through inequality perceptions and narratives from Twitter/X. <br> This interface belongs to MUHAI's Social Inequality Observatory and allows you to explore and query data from MUHAI's Observatory Knowledge Graph (OKG) in a user-friendly way.<br>
+If you need help during your journey, just click the icon in the top right corner of the screen."))),
          size="l",
          label="",
          icon=icon("life-ring"),
