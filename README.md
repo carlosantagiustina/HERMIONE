@@ -39,7 +39,24 @@ branch) as follows:
 library(remotes)
 remotes::install_github("carlosantagiustina/HERMIONE")
 ```
+The app requires a token to access the backend (Observatory Knwledge Graph).
+The app searches for a .tex file containing the token at the following path.
 
+/Users/[your-username]/HERMIONE_KEY.txt
+
+which is equivalent to the output of the R code:
+
+``` r
+paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")
+```
+Hermione is also available in a dockerized version.
+To build the docker container please use the following command from the main folder of the project using your terminal/bash/console:
+
+```console
+docker build . -t hermione 
+
+ docker run -p 127.0.0.1:8080:80 hermione
+```
 ## How to run the Hermione dashboard
 
 This is a basic example which shows you how to solve a common problem:
