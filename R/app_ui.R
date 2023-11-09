@@ -381,7 +381,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             bs4Dash::box(
                               title = "Sample of Tweets matching Query",
                               width = 12,collapsed = T,
-                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (gray squares : posts from accounts that don't exist any more or hidden for privacy compliance; Not found! : posts that have been delated by their author)</i>"),
+                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (<b>Gray squares</b>: posts from accounts that don't exist any more or hidden for privacy and GDPR compliance; <b>Not found</b>: posts that have been deleted by their author)</i>"),
                               #div(uiOutput("render_tweets_sample")),
                               div(fluidRow(uiOutput("render_tweet1_sample"),
                                            uiOutput("render_tweet2_sample"),

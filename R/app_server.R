@@ -187,6 +187,8 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
   #G <- set_vertex_attr(G, "title", index = V(G), NA)
   #Edge attributes
   G <- set_edge_attr(G,"width",index = E(G),E(G)$weight^(1/2))
+  G <- set_edge_attr(G,"id",index = E(G),  paste0(get.edgelist(G)[,1],"<->",get.edgelist(G)[,2]))
+  #G <- set_edge_attr(G,"name",index = E(G),  paste0(get.edgelist(G)[,1],"<->",get.edgelist(G)[,2]))
   G <- set_edge_attr(G,"percentile",index = E(G),fmsb::percentile(E(G)$weight)/100)
 
   #min edge cooccurrence filter
@@ -241,7 +243,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
     visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
     visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
                =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
-    visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
+    visNetwork::visInteraction(multiselect = F, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
     visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
                            manipulation = list(enabled = TRUE,deleteNode = FALSE, deleteEdge = FALSE,
                                                editEdgeCols = c("title"),
@@ -438,9 +440,9 @@ WHERE {
           ?date_time < "::END_DATE::"^^xsd:dateTime ::CONTAINSENTITYFILTER::)
 }
 GROUP BY ?id ?entity ?entityDB  ?date_time ?sentiment ?like ?retweet ?polarity ?subjectivity
-ORDER BY ?date_time ?id ?entity ?entityDB
+ORDER BY RAND()
 ::N_LIMIT:: ::OFFSET::'
-
+#ORDER BY RAND() or ORDER BY ?date_time ?id ?entity ?entityDB
 MYREQUEST=REQUEST(QUERY_=QUERY,
                   PREFIX_=PREFIX,
                   ENTITY_=ENTITY,
@@ -646,11 +648,15 @@ fg_analysis=function(QUERY=QUERY_FG,
   # API_KEY =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt"))
 
   #using lemma as word:   ?token rdf:value ?word .
-  #  ?token nif:lemma ?lemma . #removed lemma because there are some errors (mismatches)
-  #GROUP BY ?ent1 ?entityDB1 ?entityMention1 ?ent2 ?entityDB2 ?entityMention2 ?date ?id ?token ?lemma ?word ?pos ?index ?dep_prop ?token_dep ?index_dep ?word_dep ?refers_to ?entity
+
+  if(ENTITY_1==ENTITY_2){
+    return(showModal(modalDialog(paste("Error:","Selected entities are identical. Please select two different entities."),,easyClose = TRUE)))
+  }
+
   selected_entities=c(ENTITY_1,ENTITY_2)
 
   MYREQUEST=REQUEST_FG(TIMEOUT_ = 120,QUERY_ = QUERY,ENTITY_1_ = ENTITY_1,ENTITY_2_ = ENTITY_2,PREFIX_ = PREFIX,API_KEY_ = API_KEY,START_DATE_ = START_DATE,END_DATE_ = END_DATE,ENDPOINT_  = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql",N_THRESHOLD_ = NA,ENTITY_ = NA)
+
 
   ANSWER = tryCatch({
     content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
@@ -851,14 +857,21 @@ fg_analysis=function(QUERY=QUERY_FG,
               }
               names(which(da == min(da)))
             }
-            paths_roots=ancestor(SUBGRAPH,c(selected_entities[1],selected_entities[2]))
+
+            paths_roots=tryCatch({
+              ancestor(SUBGRAPH,c(selected_entities[1],selected_entities[2]))
+            },
+            error=function(e){showModal(modalDialog(paste("Error:","The number of posts mentioning the two selected entities is insufficient or null.  Network cannot be built, please select another pair of entities."),,easyClose = TRUE))},
+            warning=function(w) {}
+            )
+
 
             #Subset graph keeping Tweets with direct paths between entities
 
             n_tweets=length(unique(gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name",index =   grepl("http://example.com/ent_|http://example.com/token_",vertex_attr(SUBGRAPH,"name"))))))
 
             #vertex_attr(SUBGRAPH,"name")[grepl(pattern = "http://example[.]com/ent_",x = vertex_attr(SUBGRAPH,"name"))]
-            if(n_tweets>7 & length(paths_roots)>=6){
+            if(n_tweets>7 && length(paths_roots)>=6){
               SUBGRAPH=subgraph(SUBGRAPH, c(selected_entities,vertex_attr(SUBGRAPH,"name")[vertex_attr(SUBGRAPH,"name") %in% VERTICES_DB_frames_roots$id],vertex_attr(SUBGRAPH,"name")[gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",vertex_attr(SUBGRAPH,"name")) %in%  gsub("http://example.com/ent_|http://example.com/token_|[%]{1}23[0-9%A-Z]{1,}$","",paths_roots)]))
 
               #vertex_attr(SUBGRAPH,"level",index = grepl("http://example.com/token_",x = vertex_attr(SUBGRAPH,"name")))
@@ -993,7 +1006,9 @@ fg_analysis=function(QUERY=QUERY_FG,
             results[["times"]]= MYREQUEST$times
             return(results)
 }
-
+hermione_controlroom_text=c("",
+                            ""
+                            )
 
 #reactive_sparqlentresult=query_and_build_net()
 
@@ -1005,6 +1020,7 @@ app_server <- function(input, output, session) {
   #vals <- reactiveValues(count = -1)
   sparql_queries_BE_n <- reactiveValues(value_BE_n=0)
   sparql_queries_FG_n <- reactiveValues(value_FG_n=0)
+  hermione_flags <- reactiveValues(intro=0,methods=0,cases=0, DO=0,NF=0,info=0)
   hermione_controlroom_tutorial_n <- reactiveValues(value_tut_n=0)
 
   random_tweet_ids<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
@@ -1056,7 +1072,8 @@ app_server <- function(input, output, session) {
    ##### HERMIONE SERVER ####
    ###### Hermione: at Intro ####
    observeEvent(input$current_tab, {
-     if (input$current_tab == "intro") {
+     if (input$current_tab == "intro" && hermione_flags$intro==0) {
+       hermione_flags$intro=1
        showModal(modalDialog(
          title = "Welcome to the I.O. & HERMIONE!",
          list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
@@ -1071,7 +1088,8 @@ app_server <- function(input, output, session) {
      }
 
      ###### Hermione: Cases ####
-     if (input$current_tab == "cases") {
+     if (input$current_tab == "cases" && hermione_flags$cases==0) {
+       hermione_flags$cases=1
        showModal(modalDialog(
          title = "Welcome to the case studies section",
          list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
@@ -1087,11 +1105,25 @@ Finally, case studies can help to highlight the diversity of experiences of mult
        ))
      }
      ###### Hermione: methods ####
-     if (input$current_tab == "methods") {
+     if (input$current_tab == "methods" && hermione_flags$methods==0) {
+       hermione_flags$methods=1
        showModal(modalDialog(
          title = "Welcome to the methods and references section",
          list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
                              HTML("Methods for studying inequality and its perception through social media and other online sources are relevant because the web and its deliberative platforms are powerful communication and information dissemination  tools. These methods allow for the collection and analysis of data from a large and diverse sample of people and can provide access to the spontaneous conversations about inequalities, allowing for the identification of emerging issues and trends related to inequalities and intersectionality."))),
+         size="l",
+         label="",
+         icon=icon("life-ring"),
+         easyClose = TRUE,
+         footer = modalButton("Dismiss")
+       ))
+     }
+     if (input$current_tab == "info" && hermione_flags$info==0) {
+       hermione_flags$info=1
+       showModal(modalDialog(
+         title = "Welcome to the info section",
+         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                             HTML("Welcome to the info  Section. We sincerely appreciate your visit to the HERMIONE dashboard. In this space, you will find more info about the creators of the dashboard and opportunities to connect us. If you are an organization, expert, journalist, artist or advocate working on issues related to inequality please don't hesitate to get in touch. Together, we can make a difference. Thank you for your time."))),
          size="l",
          label="",
          icon=icon("life-ring"),
@@ -1153,10 +1185,10 @@ Finally, case studies can help to highlight the diversity of experiences of mult
    )
 
    #Sample tweets for selected entity
-    observeEvent(eventExpr = is.character(input$current_node_id$node) && input$current_node_id$node!="" ,{
-     # require(input$current_node_id$node)
+    observeEvent(eventExpr = is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!="" ,{
+     # require(input$current_BEnode_id$node)
       myresult= reactive_sparqlentresult()
-random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node]))))
+random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity %in% unlist(input$current_BEnode_id$nodes,use.names = F)]))))
     }
 )
 
@@ -1168,26 +1200,25 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      req(reactive_sparqlentresult())
      myresult<-reactive_sparqlentresult()
      myresult$network_vis %>%
-       visEvents(hoverNode = "function(nodes) {
-                Shiny.onInputChange('current_node_id', nodes);
+       visEvents(selectNode = "function(nodes) {
+                Shiny.onInputChange('current_BEnode_id', nodes);
               ;}") %>%
-       visEvents(hoverEdge = "function(edges) {
-                Shiny.onInputChange('current_edge_id', edges);
+       visEvents(selectEdge = "function(edges) {
+                Shiny.onInputChange('current_BEedge_id', edges);
               ;}")
    }
    )
 
    output$BEresult <-renderVisNetwork(reactive_BE_network())
-
    #Provide information about selected node
    output$return_BE_node <- renderPrint({
-     #data$visN_data$nodes[input$BE_current_node_id,]
-     input$current_node_id
+     #data$visN_data$nodes[input$BE_current_BEnode_id,]
+     input$current_BEnode_id
    })
    #Provide information about selected node
    output$return_BE_edge  <- renderPrint({
-     # data$visN_data$edges[input$BE_current_edge_id,]
-     input$current_edge_id
+     # data$visN_data$edges[input$BE_current_BEedge_id,]
+     input$current_BEedge_id
    })
 
    #Provide information about node positions
@@ -1298,10 +1329,10 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
   #  sparql_data= query_and_build_net(target_nodes_ = 200,filter_ = "Trump")
   #  sparql_data$network_vis %>%
   #     visEvents(hoverNode = "function(nodes) {
-  #       Shiny.onInputChange('current_node_id', nodes);
+  #       Shiny.onInputChange('current_BEnode_id', nodes);
   #     ;}") %>%
   #     visEvents(hoverEdge = "function(edges) {
-  #       Shiny.onInputChange('current_edge_id', edges);
+  #       Shiny.onInputChange('current_BEedge_id', edges);
   #     ;}")
   # })
 
@@ -1503,24 +1534,27 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
 
 
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
-   #FG_entity_1 <- reactiveVal("Health equity")
-   #FG_entity_2 <- reactiveVal("Racism")
+#    FG_entity_1 <- reactiveVal()
+#    FG_entity_2 <- reactiveVal()
+   #Sample tweets for selected entity
 
 
    output$FG_entity_1 <- renderUI({
      selectInput("myFG_entity_1",
                  "Selected entity A:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected =  "Health equity",selectize = TRUE)
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selectize = TRUE)
    })
    output$FG_entity_2 <- renderUI({
      selectInput("myFG_entity_2",
                  "Selected entity B:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = "Racism", selectize = TRUE)
+                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]), selectize = TRUE)
    })
 #browser()
+
+
+
    FG_entity_1 <- reactive({input$myFG_entity_1 })
    FG_entity_2 <- reactive({input$myFG_entity_2 })
-
 
    output$FG_entity_11 <- renderUI({
      req(FG_entity_1())
@@ -1536,7 +1570,48 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
                  "Selected entity B:",
                  choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_2, selectize = TRUE)
    })
+   #FG ENTETIES UPDATE BASED ON SELECTED NODE
+    observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
+req(input$current_BEnode_id$node)
+      req(input$myFG_entity_1)
+      #browser()
+      updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
 
+    })
+
+    observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
+      req(input$current_BEnode_id$node)
+      req(input$myFG_entity_11)
+      #browser()
+      updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
+
+    })
+
+    #FG ENTETIES UPDATE BASED ON SELECTED EDGES
+    observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
+      req(input$current_BEedge_id$edge)
+      req(input$myFG_entity_1)
+      req(input$myFG_entity_2)
+      #browser()
+      updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
+
+      updateSelectInput(session, "myFG_entity_2", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
+
+    })
+
+    observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
+      req(input$current_BEedge_id$edge)
+      req(input$myFG_entity_11)
+      req(input$myFG_entity_22)
+      print(input$current_BEedge_id$edge)
+      #browser()
+      updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
+
+      updateSelectInput(session, "myFG_entity_22", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
+
+    })
+
+#SYNCRO THE TWO UI INPUTS
    observeEvent(input$myFG_entity_11, {
      req(input$myFG_entity_11)
      updateSelectInput(session, "myFG_entity_1", selected = input$myFG_entity_11)
@@ -1592,11 +1667,11 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
      myresult<-reactive_sparqlentresult_FG()
      myresult$visualization
      # %>%
-     #   visEvents(hoverNode = "function(nodes) {
-     #            Shiny.onInputChange('current_node_id', nodes);
+     #   visEvents(selectNode = "function(nodes) {
+     #            Shiny.onInputChange('current_FGnode_id', nodes);
      #          ;}") %>%
-     #   visEvents(hoverEdge = "function(edges) {
-     #            Shiny.onInputChange('current_edge_id', edges);
+     #   visEvents(selectEdge = "function(edges) {
+     #            Shiny.onInputChange('current_FGedge_id', edges);
      #          ;}")
    }
    )
@@ -1614,12 +1689,12 @@ random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement =
    # )
 
    #Sample tweets for selected entity
-   observeEvent(eventExpr = is.character(input$current_node_id$node) && input$current_node_id$node!="" ,{
-     # require(input$current_node_id$node)
-     myresult= reactive_sparqlentresult()
-     random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_node_id$node]))))
-   }
-   )
+   # observeEvent(eventExpr = is.character(input$current_FGnode_id$node) && input$current_FGnode_id$node!="" ,{
+   #   # require(input$current_FGnode_id$node)
+   #   myresult= reactive_sparqlentresult()
+   #   random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_FGnode_id$node]))))
+   # }
+   # )
 
   ##### COMPONENT 3: SUMMARY STATS #####
 
