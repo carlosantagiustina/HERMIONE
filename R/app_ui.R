@@ -343,6 +343,10 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               icon =icon( "map"),
                               width = 12,
                               collapsed = F,
+                              fluidRow(column(width = 1),
+                                       column(width = 8,textInput(inputId = "entityfilter", "Entity in Tweet RegEx filter", value = "", width = NULL, placeholder = "insert the names of one or more entities separated by | (e.g.,Obama|Trump)")),
+                                       column(width = 1)
+                              ),
                               fluidRow(
                                 column(width = 3,
                                        downloadButton('downloadNetwork_BE',
@@ -376,12 +380,25 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             ),
                                   visNetworkOutput("BEresult",
                                                    height = "650px",
-                                                   width = "100%")
+                                                   width = "100%"),
+                            fluidRow(
+                              column(width = 5,
+                                     uiOutput(outputId = "FG_entity_1")),
+                              column(width = 5,
+                                     uiOutput(outputId = "FG_entity_2")),
+                              column(width = 2,
+                                     actionButton(inputId = "confirm_ent",
+                                                  label = "  Confirm entities and go to FG view",
+                                                  icon = shiny::icon("binoculars"),
+                                                  #class = "mx-2",
+                                                  #width = "250px",
+                                                  status="danger"))
+                            )
                             ),
                             bs4Dash::box(
                               title = "Sample of Tweets matching Query",
                               width = 12,collapsed = T,
-                              HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (<b>Gray squares</b>: posts from accounts that don't exist any more or hidden for privacy and GDPR compliance; <b>Not found</b>: posts that have been deleted by their author)</i>"),
+                              HTML("<b>Select a node in the BE network here above to see a sample of posts referring to that entity</b><i> (Gray square: posts from accounts that don't exist any more or posts that are hidden for privacy and GDPR compliance; Not found: posts that have been deleted by their author)</i>"),
                               #div(uiOutput("render_tweets_sample")),
                               div(fluidRow(uiOutput("render_tweet1_sample"),
                                            uiOutput("render_tweet2_sample"),
@@ -401,7 +418,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             bs4Dash::box(
                               title = "SPARQL Queries Log",
                               width = 12,collapsed = T,
-                              div(uiOutput("sparqlqueryURL"),style="font-size: 12px;")
+                              div(uiOutput("sparqlBEqueryURL"),style="font-size: 12px;")
                               #, footer = "Advanced parameters for tweeking HERMIONE"
                             ),
                             bs4Dash::box(width = 12,
@@ -459,9 +476,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 collapsed = F,
                                 fluidRow(
                                   column(width = 6,
-                                         uiOutput(outputId = "FG_entity_1")),
+                                         uiOutput(outputId = "FG_entity_11")),
                                   column(width = 6,
-                                         uiOutput(outputId = "FG_entity_2"))
+                                         uiOutput(outputId = "FG_entity_22"))
                                 ),
                                 fluidRow(
                                   column(width = 3
@@ -501,31 +518,24 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               bs4Dash::box(
                                 title = "Sample of Tweets matching Query",
                                 width = 12,collapsed = T,
-                                HTML("<b>Select a node in the network obove to see a sample of posts referring to that entity</b><i> (gray squares : posts from accounts that don't exist any more or hidden for privacy compliance; Not found! : posts that have been delated by their author)</i>")
-                                #,div(uiOutput("render_tweets_sample")),
-                                # div(fluidRow(uiOutput("render_tweet1_sample"),
-                                #              uiOutput("render_tweet2_sample"),
-                                #              uiOutput("render_tweet3_sample"),
-                                #              uiOutput("render_tweet4_sample"),
-                                #              uiOutput("render_tweet5_sample"),
-                                #              uiOutput("render_tweet6_sample"),
-                                #              uiOutput("render_tweet7_sample"),
-                                #              uiOutput("render_tweet8_sample"),
-                                #              uiOutput("render_tweet9_sample"),
-                                #              uiOutput("render_tweet10_sample"),
-                                #              uiOutput("render_tweet11_sample"),
-                                #              uiOutput("render_tweet12_sample")
-                                # ))
-                                #, footer = "Advanced parameters for tweeking HERMIONE"
+                                HTML("<b>Sample of tweets referring to the selected pair of entities</b><i> (gray squares: posts from accounts that don't exist any more or are hidden for privacy compliance; Not found: posts that have been deleted by their author)</i>")
+                                ,div(uiOutput("render_tweets_sample")),
+                                div(fluidRow(uiOutput("render_tweet1_sampleFG"),
+                                             uiOutput("render_tweet2_sampleFG"),
+                                             uiOutput("render_tweet3_sampleFG"),
+                                             uiOutput("render_tweet4_sampleFG"),
+                                             uiOutput("render_tweet5_sampleFG"),
+                                             uiOutput("render_tweet6_sampleFG")
+                                ))
                               )
-                              # ,bs4Dash::box(
-                              #   title = "SPARQL Queries Log",
-                              #   width = 12,collapsed = T,
-                              #    div(
-                              #      uiOutput("sparqlqueryURL"),
-                              #      style="font-size: 12px;")
-                              #    #, footer = "Advanced parameters for tweeking HERMIONE"
-                              #  )
+                              ,bs4Dash::box(
+                                title = "SPARQL Queries Log",
+                                width = 12,collapsed = T,
+                                 div(
+                                   uiOutput("sparqlFGqueryURL"),
+                                   style="font-size: 12px;")
+                                 #, footer = "Advanced parameters for tweeking HERMIONE"
+                               )
                               ,color="primary")
                           )),
                         sidebar = boxSidebar(
@@ -844,22 +854,19 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                 language = 'en',
                 weekstart = 1
               ),
-              sliderInput(inputId = "slider_nmaxrows", "Max Sample Size:", value = golem::get_golem_options("max_rows_sparql"),min= 100, max=golem::get_golem_options("max_rows_sparql"), step = 100),
               bs4Dash::box(
                 title = "Bird's-eye Network - Advanced controls",
                 width = 12,
+                collapsed = T,
                # footer = "Advanced parameters for tweeking HERMIONE",
-                textInput(inputId = "entityfilter", "Entity in Tweet RegEx filter (use | as OR logic separator)", value = "", width = NULL, placeholder = "insert the names of one or more entities separated by | (e.g.,Obama|Trump)"),
-                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird's-eye Network View:",value = 100, min=25, max=500,step =  25)
+                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird's-eye Network View:",value = 100, min=25, max=500,step =  25),
+               sliderInput(inputId = "slider_nmaxrows", "Max Sample Size:", value = golem::get_golem_options("max_rows_sparql"),min= 100, max=golem::get_golem_options("max_rows_sparql"), step = 100)
               ),
               bs4Dash::box(
-                title = "Fine Grained View  - Advanced controls
-",
+                title = "Fine Grained View  - Advanced controls",
                 width = 12,
+                collapsed = T
               #  footer = "Advanced parameters for tweeking HERMIONE",
-              uiOutput(outputId = "FG_entity_11"),
-              uiOutput(outputId = "FG_entity_22")
-
               )
             )
           ),

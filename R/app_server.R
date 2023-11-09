@@ -96,7 +96,7 @@ REQUEST= function(QUERY_,
     MY_QUERY = MY_QUERY %>% gsub("::OFFSET::","",ignore.case = F,x=.)
   }
 
-print(MY_QUERY)
+  print(MY_QUERY)
   #RUN REQUEST
   REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
                     query=list("query"=MY_QUERY),
@@ -115,13 +115,13 @@ print(MY_QUERY)
 ###### Function to build Bird Eye Network ######
 build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
                    power=4,filter=NA){
-## Parameters for testing
+  ## Parameters for testing
   # ANSWER_=ANSWER
   # target_nodes=target_nodes_
   # filter=filter_
   # percentile=0.9
   # power=4
-##
+  ##
   require(tidytext)
   require(tidyverse)
   require(quanteda)
@@ -156,7 +156,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
   if(nrow(FCM_SELECT)<5){return({
     message("Error: Not enought entity mentions")
     NULL}
-    )}
+  )}
   G = FCM_SELECT %>% quanteda.textplots::as.igraph(.,
                                                    omit_isolated = F,
                                                    weighted = T)
@@ -174,7 +174,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
   G <- set_vertex_attr(G, 'percentile', index = V(G), fmsb::percentile(featfreq(DFM))/100)
   G <- set_vertex_attr(G, 'level', index = !is.na(entities$entityDB), 1)
   G <- set_vertex_attr(G, 'shape', index = !is.na(entities$entityDB), "square")#
- # G <- set_vertex_attr(G, 'shape', index = V(G), "text")#square
+  # G <- set_vertex_attr(G, 'shape', index = V(G), "text")#square
   # G <- set_vertex_attr(G, 'scaling.label.enabled', index = !is.na(entities$entityDB), "true")
   # G <- set_vertex_attr(G, 'scaling.label.max', index = !is.na(entities$entityDB), 50)
   # G <- set_vertex_attr(G, 'scaling.label.min', index = !is.na(entities$entityDB), 25)
@@ -219,7 +219,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
 
     G <- subgraph.edges(G, E(G)[!E(G)$below_threshold], delete.vertices = T)
     if(igraph::graph.density(G)>0.25){
-    G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F)
+      G <- subgraph.edges(G, E(G)[E(G)$weight > 1], delete.vertices = F)
     }
 
   }
@@ -239,7 +239,7 @@ build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
       smooth =list(enabled=T,roundness=1,type="discrete"),
       scaling = list(min=0.5,max=3.5),
       color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")#color = "lightgray"
-      ) %>%
+    ) %>%
     visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
     visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
                =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
@@ -281,13 +281,13 @@ content_extraction=function (x, as = NULL, type = NULL, encoding = NULL, ...) {
 
 
 query_and_build_net_pagination=function(target_nodes_=100,
-                             filter_=NA,
-                             ENTITY="",
-                             START_DATE="2018-01-01",
-                             END_DATE="2024-01-01" ,
-                             N_THRESHOLD=2,
-                             OFFSET=0,
-                             N_LIMIT=10000){
+                                        filter_=NA,
+                                        ENTITY="",
+                                        START_DATE="2018-01-01",
+                                        END_DATE="2024-01-01" ,
+                                        N_THRESHOLD=2,
+                                        OFFSET=0,
+                                        N_LIMIT=10000){
 
   #parameters for testing purpose
   # target_nodes_=100
@@ -383,7 +383,7 @@ query_and_build_net=function(target_nodes_=100,
                              N_THRESHOLD=2,
                              OFFSET=0,
                              N_LIMIT=10000){
-ENTITY=filter_
+  ENTITY=filter_
   #parameters for testing purpose
   # target_nodes_=100
   # filter_="Netherlands"
@@ -450,18 +450,18 @@ MYREQUEST=REQUEST(QUERY_=QUERY,
                   START_DATE_=START_DATE,
                   END_DATE_=END_DATE,
                   TIMEOUT_=60,
-                 # RESOURCE_=RESOURCE,
+                  # RESOURCE_=RESOURCE,
                   N_THRESHOLD_=N_THRESHOLD,
                   N_LIMIT_ = N_LIMIT,
-                 OFFSET_ = OFFSET,
-                ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql")
+                  OFFSET_ = OFFSET,
+                  ENDPOINT_ = "https://api.druid.datalegend.net/datasets/lisestork/OKG/services/OKG/sparql")
 ANSWER=content(MYREQUEST)
 if(!is.data.frame(content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T))){return()}
 ANSWER=content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
 results=build_net(ANSWER_  = ANSWER,
                   target_nodes = target_nodes_
                   #,filter = filter_
-                  )
+)
 #saveRDS(results,file = paste0("results",Sys.Date(),".RDS"))
 results[["my_request"]]=list()
 results[["my_request"]][["url"]]= MYREQUEST$url %>% URLdecode()
@@ -601,7 +601,7 @@ WHERE {
                        wsj:withmappedrole ?arg . }
 }
 ORDER BY DESC(?id)
-limit 1000
+limit 500
 '
 PREFIX_FG='
 PREFIX observatory: <https://www.w3id.org/okg/obio-ontology/>
@@ -660,10 +660,10 @@ fg_analysis=function(QUERY=QUERY_FG,
 
   ANSWER = tryCatch({
     content(MYREQUEST,flatten = T, simplifyDataFrame=T,simplifyVector=T) %>% readr::type_convert()
-    },
-                    error=function(e){showModal(modalDialog(paste("Error:","The number of posts mentioning the two selected entities is insufficient or null.  Network cannot be built, please select another pair of entities."),,easyClose = TRUE))},
-                  warning=function(w) {}
-    )
+  },
+  error=function(e){showModal(modalDialog(paste("Error:","The number of posts mentioning the two selected entities is insufficient or null.  Network cannot be built, please select another pair of entities."),,easyClose = TRUE))},
+  warning=function(w) {}
+  )
   if(!is.data.frame(ANSWER )){
     return()
   }
@@ -1028,7 +1028,7 @@ hermione_controlroom_text=c("Hi, here below you can set the parameters for creat
                             "Text 3",
                             "Text 4",
                             "NF Text 5"
-                            )
+)
 
 #reactive_sparqlentresult=query_and_build_net()
 
@@ -1043,27 +1043,30 @@ app_server <- function(input, output, session) {
   hermione_flags <- reactiveValues(intro=0,methods=0,cases=0, DO=0,NF=0,info=0)
   hermione_controlroom <- reactiveValues(step=1)
 
-  random_tweet_ids<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
-  sparqlLog <-reactiveVal("")
+  random_tweet_ids_BE<- reactiveVal(c(one="1266799402263478273",two="1266799254980440070",three="1266799220184383489"))
+  random_tweet_ids_FG<- reactiveVal()
+
+  sparqlLogBE <-reactiveVal("")
+  sparqlLogFG <-reactiveVal("")
   observeEvent(input$range, vals$count <- vals$count + 1)
 
   ##### INCLUDE PRERENDERED HTML FILES ####
-   output$html_1 <- renderUI(includeHTML(system.file("extdata","inflation_economicinequality.html",package = "Hermione")))
-#   output$html_1 <- renderUI(
-#     {
-#       if(){
-#         includeHTML(system.file("extdata","inflation_economicinequality.html",package = "Hermione"))
-#       }
-#
-#
-#     }
-# )
+  output$html_1 <- renderUI(includeHTML(system.file("extdata","inflation_economicinequality.html",package = "Hermione")))
+  #   output$html_1 <- renderUI(
+  #     {
+  #       if(){
+  #         includeHTML(system.file("extdata","inflation_economicinequality.html",package = "Hermione"))
+  #       }
+  #
+  #
+  #     }
+  # )
 
   output$html_2 <- renderUI(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")))
 
   ##### HERMIONE ####
 
-  ##### HERMIONE CONTROLROOM #####
+  ##### HERMIONE CONTROLROOM TUTORIAL #####
   #next step
   observeEvent(eventExpr =  input$Hnext ,{
     req(input$Hnext)
@@ -1115,639 +1118,647 @@ app_server <- function(input, output, session) {
   # })
 
 
-   output$tweet_example <-   renderUI({
-     tagList(
-       tags$blockquote(class = "twitter-tweet",
-                       tags$a(href = "https://twitter.com/twitter/status/1277996661520859136")),
-       tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-     )})
-   ###### HERMIONE SERVER ####
-   ###### Hermione: at Intro ####
-   observeEvent(input$current_tab, {
-     if (input$current_tab == "intro" && hermione_flags$intro==0) {
-       hermione_flags$intro=1
-       showModal(modalDialog(
-         title = "Welcome to the I.O. & HERMIONE!",
-         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                             HTML("nter>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide on this journey through inequality perceptions and narratives from Twitter/X. <br> This interface belongs to MUHAI's Social Inequality Observatory and allows you to explore and query data from MUHAI's Observatory Knowledge Graph (OKG) in a user-friendly way.<br>
+  output$tweet_example <-   renderUI({
+    tagList(
+      tags$blockquote(class = "twitter-tweet",
+                      tags$a(href = "https://twitter.com/twitter/status/1277996661520859136")),
+      tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+    )})
+  ###### HERMIONE SERVER ####
+  ###### Hermione: at Intro ####
+  observeEvent(input$current_tab, {
+    if (input$current_tab == "intro" && hermione_flags$intro==0) {
+      hermione_flags$intro=1
+      showModal(modalDialog(
+        title = "Welcome to HERMIONE!",
+        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                            HTML("<center>Hi internaut!<br>I hope you are doing well.</center><br>My name is HERMIONE and I will be your guide on this journey through inequality perceptions and narratives from Twitter/X. <br> This interface belongs to MUHAI's Social Inequality Observatory and allows you to explore and query data from MUHAI's Observatory Knowledge Graph (OKG) in a user-friendly way.<br>
 If you need help during your journey, just click the icon in the top right corner of the screen."))),
-         size="l",
-         label="",
-         icon=icon("life-ring"),
-         easyClose = TRUE,
-         footer = modalButton("Dismiss")
-       ))
-     }
+        size="l",
+        label="",
+        icon=icon("life-ring"),
+        easyClose = TRUE,
+        footer = modalButton("Dismiss")
+      ))
+    }
 
-     ###### Hermione: Cases ####
-     if (input$current_tab == "cases" && hermione_flags$cases==0) {
-       hermione_flags$cases=1
-       showModal(modalDialog(
-         title = "Welcome to the case studies section",
-         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                             HTML("Case studies about inequality perception are important to understand the inequality phenomenon because they help to uncover the complex ways in which inequality is experienced, perceived and understood by different groups of people and in different contexts.<br>
+    ###### Hermione: Cases ####
+    if (input$current_tab == "cases" && hermione_flags$cases==0) {
+      hermione_flags$cases=1
+      showModal(modalDialog(
+        title = "Welcome to the case studies section",
+        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                            HTML("Case studies about inequality perception are important to understand the inequality phenomenon because they help to uncover the complex ways in which inequality is experienced, perceived and understood by different groups of people and in different contexts.<br>
 Case studies can provide a detailed understanding of the specific factors that, according to people, contribute to specific forms of inequality, such as discrimination, social norms, and structural barriers.<br>
 They can also reveal how people respond to inequalities and provide insights into the ways in which inequality is perpetuated or challenged by various actors, such as individuals, institutions and organizations. They can also reveal the role of culture, history, and power relations in shaping inequality.
 Finally, case studies can help to highlight the diversity of experiences of multiform inequalities. This is particularly important in addressing intersectionality."))),
-         size="l",
-         label="",
-         icon=icon("life-ring"),
-         easyClose = TRUE,
-         footer = modalButton("Dismiss")
-       ))
-     }
-     ###### Hermione: methods ####
-     if (input$current_tab == "methods" && hermione_flags$methods==0) {
-       hermione_flags$methods=1
-       showModal(modalDialog(
-         title = "Welcome to the methods and references section",
-         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                             HTML("Methods for studying inequality and its perception through social media and other online sources are relevant because the web and its deliberative platforms are powerful communication and information dissemination  tools. These methods allow for the collection and analysis of data from a large and diverse sample of people and can provide access to the spontaneous conversations about inequalities, allowing for the identification of emerging issues and trends related to inequalities and intersectionality."))),
-         size="l",
-         label="",
-         icon=icon("life-ring"),
-         easyClose = TRUE,
-         footer = modalButton("Dismiss")
-       ))
-     }
-     if (input$current_tab == "info" && hermione_flags$info==0) {
-       hermione_flags$info=1
-       showModal(modalDialog(
-         title = "Welcome to the info section",
-         list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
-                             HTML("Welcome to the info  Section. We sincerely appreciate your visit to the HERMIONE dashboard. In this space, you will find more info about the creators of the dashboard and opportunities to connect us. If you are an organization, expert, journalist, artist or advocate working on issues related to inequality please don't hesitate to get in touch. Together, we can make a difference. Thank you for your time."))),
-         size="l",
-         label="",
-         icon=icon("life-ring"),
-         easyClose = TRUE,
-         footer = modalButton("Dismiss")
-       ))
-     }
-   })
+        size="l",
+        label="",
+        icon=icon("life-ring"),
+        easyClose = TRUE,
+        footer = modalButton("Dismiss")
+      ))
+    }
+    ###### Hermione: methods ####
+    if (input$current_tab == "methods" && hermione_flags$methods==0) {
+      hermione_flags$methods=1
+      showModal(modalDialog(
+        title = "Welcome to the methods and references section",
+        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                            HTML("Methods for studying inequality and its perception through social media and other online sources are relevant because the web and its deliberative platforms are powerful communication and information dissemination  tools. These methods allow for the collection and analysis of data from a large and diverse sample of people and can provide access to the spontaneous conversations about inequalities, allowing for the identification of emerging issues and trends related to inequalities and intersectionality."))),
+        size="l",
+        label="",
+        icon=icon("life-ring"),
+        easyClose = TRUE,
+        footer = modalButton("Dismiss")
+      ))
+    }
+    if (input$current_tab == "info" && hermione_flags$info==0) {
+      hermione_flags$info=1
+      showModal(modalDialog(
+        title = "Welcome to the info section",
+        list(html = tagList(HTML(paste0("<center>",hermione_avatar[sample(1:4,1)],"</center>")),HTML("<br><br>"),
+                            HTML("Welcome to the info  Section. We sincerely appreciate your visit to the HERMIONE dashboard. In this space, you will find more info about the creators of the dashboard and opportunities to connect us. If you are an organization, expert, journalist, artist or advocate working on issues related to inequality please don't hesitate to get in touch. Together, we can make a difference. Thank you for your time."))),
+        size="l",
+        label="",
+        icon=icon("life-ring"),
+        easyClose = TRUE,
+        footer = modalButton("Dismiss")
+      ))
+    }
+  })
   ####CORE ####
   ##### COMPONENT 1: BIRD EYE PERSPECTIVE #####
-   ###### REACTIVE NETWORK AND FILTERS ####
+  ###### REACTIVE NETWORK AND FILTERS ####
 
 
-   # trigger_birdeye <- eventReactive(input$current_tab, {
-   #   req(input$current_tab == 'tab')
-   # })
+  # trigger_birdeye <- eventReactive(input$current_tab, {
+  #   req(input$current_tab == 'tab')
+  # })
 
-   reactive_sparqlentresult = eventReactive(
-     eventExpr = {
-       input$sparqltaskBE  | input$runBE# add other condition that triggers query
-     },
-     ignoreNULL = TRUE,
-     ignoreInit = FALSE,
-     valueExpr = {
-       if (TRUE) {
-         return(withProgress({
-           setProgress(message = "BE component sending SPARQL query to OKG. Please wait...")
-           print(paste0("START_DATE: ",input$dateRange2[1]))
-           print(paste0("END_DATE: ",input$dateRange2[2]))
-           print(paste0("filter_: ",input$entityfilter))
-           print(paste0("target_nodes_: ",input$slider_nentites))
-           print(paste0("N_LIMIT: ",input$slider_nmaxrows))
+  reactive_sparqlentresult = eventReactive(
+    eventExpr = {
+      input$sparqltaskBE  | input$runBE# add other condition that triggers query
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = TRUE,
+    valueExpr = {
+      #req()
+      if (TRUE) {
+        return(withProgress({
+          setProgress(message = "BE component sending SPARQL query to OKG. Please wait...")
+          print(paste0("START_DATE: ",input$dateRange2[1]))
+          print(paste0("END_DATE: ",input$dateRange2[2]))
+          print(paste0("filter_: ",input$entityfilter))
+          print(paste0("target_nodes_: ",input$slider_nentites))
+          print(paste0("N_LIMIT: ",input$slider_nmaxrows))
 
-           myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = as.integer(input$slider_nmaxrows),START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
+          myresult=  query_and_build_net(target_nodes_ = as.integer(input$slider_nentites),filter_ =ifelse(input$entityfilter=="",NA,input$entityfilter) ,N_THRESHOLD = 0,OFFSET = 0,N_LIMIT = as.integer(input$slider_nmaxrows),START_DATE = input$dateRange2[1],END_DATE = input$dateRange2[2])
 
-        #if(myresult=="Error: Not enought entity mentions") return(NULL)
-           #n_unique=length(unique(myresult$n_ent_by_id$id))
-           #random_tweet_ids(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = n_unique, replace=FALSE)))
-           if(is.null(myresult)){return(NULL)}
-           if(length(unique(myresult$n_ent_by_id$id))>=1){
-             random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$n_ent_by_id$id))))
-             }
-           myresult
-         },
-         min = 0,
-         max = 2,
-         value = 1
-         ))}
-     }
-   )
-
-   observeEvent(eventExpr = {
-     (input$sparqltaskBE | input$runBE)
-     #&& reactive_sparqlentresult()!=# add other condition that triggers query
-   },{
-     req(reactive_sparqlentresult())
-     sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
-   }
-   )
-
-   #Sample tweets for selected entity
-    observeEvent(eventExpr = is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!="" ,{
-     # require(input$current_BEnode_id$node)
-      myresult= reactive_sparqlentresult()
-random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity %in% unlist(input$current_BEnode_id$nodes,use.names = F)]))))
+          #if(myresult=="Error: Not enought entity mentions") return(NULL)
+          #n_unique=length(unique(myresult$n_ent_by_id$id))
+          #random_tweet_ids_BE(gsub(pattern = "http://example.com/tweet_",replacement = "",sample(x = unique(myresult$n_ent_by_id$id), size = n_unique, replace=FALSE)))
+          if(is.null(myresult)){return(NULL)}
+          if(length(unique(myresult$n_ent_by_id$id))>=1){
+            random_tweet_ids_BE(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$n_ent_by_id$id))))
+          }
+          myresult
+        },
+        min = 0,
+        max = 2,
+        value = 1
+        ))}
     }
-)
+  )
 
-   output$sparqlqueryURL= renderUI({
-     HTML(text = sparqlLog())
-   })
+  observeEvent(eventExpr = {
+    (input$sparqltaskBE | input$runBE)
+    #&& reactive_sparqlentresult()!=# add other condition that triggers query
+  },{
 
-   reactive_BE_network = reactive({
-     req(reactive_sparqlentresult())
-     myresult<-reactive_sparqlentresult()
-     myresult$network_vis %>%
-       visEvents(selectNode = "function(nodes) {
+    req(reactive_sparqlentresult())
+    updateTabsetPanel(session, "current_tab", selected = "DO")
+    sparqlLogBE({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLogBE() )})
+  }
+  )
+
+  #Sample tweets for selected entity
+  observeEvent(eventExpr = is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!="" ,{
+    # require(input$current_BEnode_id$node)
+    myresult= reactive_sparqlentresult()
+    random_tweet_ids_BE(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity %in% unlist(input$current_BEnode_id$nodes,use.names = F)]))))
+  }
+  )
+
+  output$sparqlBEqueryURL= renderUI({
+    HTML(text = sparqlLogBE())
+  })
+
+  reactive_BE_network = reactive({
+    req(reactive_sparqlentresult())
+    myresult<-reactive_sparqlentresult()
+    myresult$network_vis %>%
+      visEvents(selectNode = "function(nodes) {
                 Shiny.onInputChange('current_BEnode_id', nodes);
               ;}") %>%
-       visEvents(selectEdge = "function(edges) {
+      visEvents(selectEdge = "function(edges) {
                 Shiny.onInputChange('current_BEedge_id', edges);
               ;}")
-   }
-   )
+  }
+  )
 
-   output$BEresult <-renderVisNetwork(reactive_BE_network())
-   #Provide information about selected node
-   output$return_BE_node <- renderPrint({
-     #data$visN_data$nodes[input$BE_current_BEnode_id,]
-     input$current_BEnode_id
-   })
-   #Provide information about selected node
-   output$return_BE_edge  <- renderPrint({
-     # data$visN_data$edges[input$BE_current_BEedge_id,]
-     input$current_BEedge_id
-   })
+  output$BEresult <-renderVisNetwork(reactive_BE_network())
+  #Provide information about selected node
+  output$return_BE_node <- renderPrint({
+    #data$visN_data$nodes[input$BE_current_BEnode_id,]
+    input$current_BEnode_id
+  })
+  #Provide information about selected node
+  output$return_BE_edge  <- renderPrint({
+    # data$visN_data$edges[input$BE_current_BEedge_id,]
+    input$current_BEedge_id
+  })
 
-   #Provide information about node positions
-   observeEvent(input$store_position, {
-     visNetworkProxy("birdresult") %>% visGetPositions()
-   })
+  #Provide information about node positions
+  observeEvent(input$store_position, {
+    visNetworkProxy("birdresult") %>% visGetPositions()
+  })
 
-   nodes_positions_BE <- reactive({
-     positions <- input$network_positions
-     if(!is.null(positions)){
-       nodes_positions <- do.call("rbind", lapply(positions, function(x){ data.frame(x = x$x, y = x$y)}))
-       nodes_positions$id <- names(positions)
-       nodes_positions
-     } else {
-       NULL
-     }
-   })
-   #Handle network download
-   output$downloadNetwork_BE <- downloadHandler(
-     filename = function() {
-       paste('network-', Sys.Date(),"_filter",input$entityfilter,"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
-     },
-     content = function(con) {
-       nodes_positions <- nodes_positions_BE()
-       net_data <- as_data_frame(reactive_sparqlentresult()$igraph, what = "both")
-       if(!is.null(nodes_positions)){
-         nodes_save <- merge(net_data$vertices, nodes_positions, by = "id", all = T)
-       } else  {
-         nodes_save <- net_data$vertices
-       }
+  nodes_positions_BE <- reactive({
+    positions <- input$network_positions
+    if(!is.null(positions)){
+      nodes_positions <- do.call("rbind", lapply(positions, function(x){ data.frame(x = x$x, y = x$y)}))
+      nodes_positions$id <- names(positions)
+      nodes_positions
+    } else {
+      NULL
+    }
+  })
+  #Handle network download
+  output$downloadNetwork_BE <- downloadHandler(
+    filename = function() {
+      paste('network-', Sys.Date(),"_filter",input$entityfilter,"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
+    },
+    content = function(con) {
+      nodes_positions <- nodes_positions_BE()
+      net_data <- as_data_frame(reactive_sparqlentresult()$igraph, what = "both")
+      if(!is.null(nodes_positions)){
+        nodes_save <- merge(net_data$vertices, nodes_positions, by = "id", all = T)
+      } else  {
+        nodes_save <- net_data$vertices
+      }
 
-       visNetwork(nodes = nodes_save, edges =net_data$edges,idToLabel = FALSE,
-                  physics = F,type = "square") %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=2.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
-         visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
-         visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
-                    =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
-         visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
-         visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
-                                manipulation = list(enabled = TRUE,deleteNode = T, deleteEdge = T,
-                                                    editEdgeCols = c("title"),
-                                                    editNodeCols = c("title","color")),
-                                nodesIdSelection = list(enabled = T),
-                                highlightNearest = list(enabled = T),
-                                height = "800px",#"fit-content"
-                                width = "100%",
-                                autoResize = T
-         ) %>%
-         visEvents(doubleClick =
-                     "function(params) {
+      visNetwork(nodes = nodes_save, edges =net_data$edges,idToLabel = FALSE,
+                 physics = F,type = "square") %>% visNetwork::visEdges(dashes = F,arrows ="", smooth =list(enabled=T,roundness=1,type="discrete"),scaling = list(min=0.25,max=2.5),color = list(color = "lightgray", highlight = "#BF616A", hover = "goldenrod4")) %>%
+        visNetwork::visNodes(color = list(background = "lightgray",border="black", highlight = list(border="firebrick",background="#BF616A"), hover = list(border="goldenrod",background='#ffc100')),scaling = list(min= 10, max= 50,label=list(enabled=T,min= 22.5, max= 45,maxVisible= 25,drawThreshold= 5))) %>%
+        visPhysics(solver = "hierarchicalRepulsion",hierarchicalRepulsion
+                   =list(nodeDistance=275,avoidOverlap=1,springLength=150),minVelocity=1,maxVelocity = 20,stabilization = list(enabled=F)) %>%
+        visNetwork::visInteraction(multiselect = T, navigationButtons = T,hover=T,dragNodes = F,dragView = T) %>%
+        visNetwork::visOptions(selectedBy = list(variable="DBpedia", multiple="true"),collapse = F,
+                               manipulation = list(enabled = TRUE,deleteNode = T, deleteEdge = T,
+                                                   editEdgeCols = c("title"),
+                                                   editNodeCols = c("title","color")),
+                               nodesIdSelection = list(enabled = T),
+                               highlightNearest = list(enabled = T),
+                               height = "800px",#"fit-content"
+                               width = "100%",
+                               autoResize = T
+        ) %>%
+        visEvents(doubleClick =
+                    "function(params) {
     var nodeID = params.nodes[0];
     var DBpediaUrl = this.body.nodes[nodeID].options.DBpediaUrl;
     window.open(DBpediaUrl, '_blank');
    }") %>%
-         visExport() %>%
-         visSave(con)
-     }
-   )
+        visExport() %>%
+        visSave(con)
+    }
+  )
 
-   ######  SIDEBAR UPDATES ####
+  ######  SIDEBAR UPDATES ####
 
-   observeEvent(input$toggle_card_sidebar, {
-     updateBoxSidebar("mycardsidebar")
-   })
-   observeEvent(input$BEinfo, {
-     input$BEinfo=T
-   })
+  observeEvent(input$toggle_card_sidebar, {
+    updateBoxSidebar("mycardsidebar")
+  })
+  observeEvent(input$BEinfo, {
+    input$BEinfo=T
+  })
 
-   observeEvent(input$sidebar, {
-     toastOpts$class <- if (input$sidebar) "bg-success" else "bg-danger"
-     toast(
-       title = if (input$sidebar) "Sidebar opened!" else "Sidebar is closed!",
-       options = toastOpts
-     )
-   })
+  observeEvent(input$sidebar, {
+    toastOpts$class <- if (input$sidebar) "bg-success" else "bg-danger"
+    toast(
+      title = if (input$sidebar) "Sidebar opened!" else "Sidebar is closed!",
+      options = toastOpts
+    )
+  })
 
-   ######  CONTROLBAR UPDATES ####
+  ######  CONTROLBAR UPDATES ####
 
-   # shiny::observeEvent(input$controlbar, {
-   #   toastOpts <- list(
-   #     autohide = TRUE,
-   #     icon = "fas fa-home",
-   #     close = FALSE,
-   #     position = "bottomRight"
-   #   )
-   #   toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
-   #   toast(
-   #     title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
-   #     options = toastOpts
-   #   )
-   #
-   # })
-
-   shiny::observeEvent(input$controlbarToggleBE, {
-     updateControlbar(id = "controlbar")
-   })
-   shiny::observeEvent(input$controlbarToggleFG, {
-     updateControlbar(id = "controlbar")
-   })
-   shiny::observeEvent(input$infobarToggleBE, {
-     updateSidebar(id = "BE_info")
-   })
-   shiny::observeEvent(input$infobarToggleFG, {
-     updateSidebar(id = "FG_info")
-   })
-
-  # output$BEnetwork <- renderVisNetwork({
+  # shiny::observeEvent(input$controlbar, {
+  #   toastOpts <- list(
+  #     autohide = TRUE,
+  #     icon = "fas fa-home",
+  #     close = FALSE,
+  #     position = "bottomRight"
+  #   )
+  #   toastOpts$class <- if (input$controlbar) "bg-success" else "bg-danger"
+  #   toast(
+  #     title = if (input$controlbar) "Controlbar opened!" else "Controlbar closed!",
+  #     options = toastOpts
+  #   )
   #
-  #  sparql_data= query_and_build_net(target_nodes_ = 200,filter_ = "Trump")
-  #  sparql_data$network_vis %>%
-  #     visEvents(hoverNode = "function(nodes) {
-  #       Shiny.onInputChange('current_BEnode_id', nodes);
-  #     ;}") %>%
-  #     visEvents(hoverEdge = "function(edges) {
-  #       Shiny.onInputChange('current_BEedge_id', edges);
-  #     ;}")
   # })
 
+  shiny::observeEvent(input$controlbarToggleBE, {
+    updateControlbar(id = "controlbar")
+  })
+  shiny::observeEvent(input$controlbarToggleFG, {
+    updateControlbar(id = "controlbar")
+  })
+  shiny::observeEvent(input$infobarToggleBE, {
+    updateSidebar(id = "BE_info")
+  })
+  shiny::observeEvent(input$infobarToggleFG, {
+    updateSidebar(id = "FG_info")
+  })
 
 
-  # observe({
-  #   visNetworkProxy("BE_network") %>%
-  #     visFocus(id = input$BE_focus, scale = 4)
-  # })
-
-
-  # output[["DT_edges"]] <-  DT::renderDataTable(
-  #   expr = {
-  #   data$edges %>%
-  #     head(.)
-  #     }
-  # , server = F
-  # ,future = T,
-  # options=list(scrollX=T,pageLength = 3))
-
-  # output[["DTnodes"]] <-  DT::renderDT(
-  #   expr = {
-  #     data$nodes[,!(colnames(data$nodes) %in% c("occurences","timestamps","description_text"))] %>%
-  #       head(.)
-  #   }
-  #   , server = T
-  #   ,future = F
-  #   #,extensions = 'Buttons'
-  #   #,dom = 'tpB'
-  #   ,options=list(scrollX=T, pageLength = 3,autoWidth = FALSE),selection = list(target = 'row'))
-
-  # eventReactive(input$update_params, {
-  #
-  #   output$param_buttons <- renderUI({
-  #
-  #
-  #   })
-  # }
-  #               )
-
-   #extract_tweets_sample <- observeEvent({})
-   # output$render_tweets_sample <-   renderUI(
-   #   {
-   #  fluidRow(column(width = 4,
-   #   tagList(
-   #     tags$blockquote(class = "twitter-tweet",
-   #                     tags$a(href =  paste0("https://twitter.com/equalitytrust/status/",random_tweet_ids()[1])))
-   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-   #   )),
-   #   column(width = 4,tagList(
-   #     tags$blockquote(class = "twitter-tweet",
-   #                     tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2])))
-   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-   #   )),
-   #   column(width = 4, tagList(
-   #     tags$blockquote(class = "twitter-tweet",
-   #                     tags$a(href = paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3])))
-   #     ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-   #   )),
-   #   )
-   #     }
-   #   )
-
-   #browser()
-   #observe({
-   #print(random_tweet_ids()[1:12])
-   #})
-
-   output$render_tweet1_sample <-   renderUI(
+  output$render_tweet1_sample <-   renderUI(
     {column(width = 8,
-                       tagList(
-                         tags$blockquote(class = "twitter-tweet",
-                                         tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[1])))
-                         ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-                       )
-       )
-     }
-   )
-   output$render_tweet2_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[2])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet3_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[3])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet4_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[4])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet5_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[5])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet6_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[6])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet7_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[7])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet8_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[8])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet9_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[9])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet10_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[10])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet11_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[11])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   output$render_tweet12_sample <-   renderUI(
-     {column(width = 8,
-             tagList(
-               tags$blockquote(class = "twitter-tweet",
-                               tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids()[12])))
-               ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
-             )
-     )
-     }
-   )
-   #browser()
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[1])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet2_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[2])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet3_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[3])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet4_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[4])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet5_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[5])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet6_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[6])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet7_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[7])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet8_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[8])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet9_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[9])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet10_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[10])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet11_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[11])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet12_sample <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_BE()[12])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  #browser()
 
-   output$downloadFGData <- downloadHandler(
-     filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_finegrained_data_HERMIONE.csv')
-     ,
-     content = function(file) {
-       readr::write_csv(reactive_sparqlentresult()$answer_final, file)
-     }
-   )
+  output$downloadFGData <- downloadHandler(
+    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_finegrained_data_HERMIONE.csv')
+    ,
+    content = function(file) {
+      readr::write_csv(reactive_sparqlentresult()$answer_final, file)
+    }
+  )
 
 
-
+  # output$selected_edgeFG= renderUI(
+  #   {
+  #     #req(input$current_BEedge_id)
+  #     HTML(paste0("Selected entity A: ",
+  #                    gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge))
+  #                    ," - Selected entity B: ",
+  #                    gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge))
+  #                    ))
+  #   }
+  # )
   ##### COMPONENT 2: FINE GRAINED ANALYSIS #####
-#    FG_entity_1 <- reactiveVal()
-#    FG_entity_2 <- reactiveVal()
-   #Sample tweets for selected entity
+  #    FG_entity_1 <- reactiveVal()
+  #    FG_entity_2 <- reactiveVal()
+  #Sample tweets for selected entity
+
+ ##### input parameters generation ####
+  output$FG_entity_1 <- renderUI({
+    selectInput("myFG_entity_1",
+                "Selected entity A:",
+                choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selectize = TRUE
+                ,selected = "Economic inequality"
+                )
+  })
+  output$FG_entity_2 <- renderUI({
+    selectInput("myFG_entity_2",
+                "Selected entity B:",
+                choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]), selectize = TRUE,selected = "Racism")
+  })
+  #browser()
 
 
-   output$FG_entity_1 <- renderUI({
-     selectInput("myFG_entity_1",
-                 "Selected entity A:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selectize = TRUE)
-   })
-   output$FG_entity_2 <- renderUI({
-     selectInput("myFG_entity_2",
-                 "Selected entity B:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]), selectize = TRUE)
-   })
-#browser()
+
+  FG_entity_1 <- reactive({input$myFG_entity_1 })
+  FG_entity_2 <- reactive({input$myFG_entity_2 })
+
+  output$FG_entity_11 <- renderUI({
+    req(FG_entity_1())
+    myFG_entity_1=FG_entity_1()
+    selectInput("myFG_entity_11",
+                "Selected entity A:",
+                choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_1 ,selectize = TRUE)
+  })
+  output$FG_entity_22 <- renderUI({
+    req(FG_entity_2())
+    myFG_entity_2=FG_entity_2()
+    selectInput("myFG_entity_22",
+                "Selected entity B:",
+                choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_2, selectize = TRUE)
+  })
+  #FG ENTETIES UPDATE BASED ON SELECTED NODE
+  observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
+    req(input$current_BEnode_id$node)
+    req(input$myFG_entity_1)
+    #browser()
+    updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
+
+  })
+
+  observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
+    req(input$current_BEnode_id$node)
+    req(input$myFG_entity_11)
+    #browser()
+    updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
+
+  })
+
+  #FG ENTETIES UPDATE BASED ON SELECTED EDGES
+  observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
+    req(input$current_BEedge_id$edge)
+    req(input$myFG_entity_1)
+    req(input$myFG_entity_2)
+    #browser()
+    updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
+
+    updateSelectInput(session, "myFG_entity_2", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
+
+  })
+
+  observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
+    req(input$current_BEedge_id$edge)
+    req(input$myFG_entity_11)
+    req(input$myFG_entity_22)
+    print(input$current_BEedge_id$edge)
+    #browser()
+    updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
+
+    updateSelectInput(session, "myFG_entity_22", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
+
+  })
+  #SYNCRO THE TWO UI INPUTS
+  observeEvent(input$myFG_entity_11, {
+    req(input$myFG_entity_11)
+    updateSelectInput(session, "myFG_entity_1", selected = input$myFG_entity_11)
+  })
+
+  observeEvent(input$myFG_entity_22, {
+    req(input$myFG_entity_22)
+    updateSelectInput(session,  "myFG_entity_2", selected = input$myFG_entity_22)
+  })
+
+  #browser()
+  observeEvent(input$confirm_ent, {
+    req(input$confirm_ent)
+  updateTabsetPanel(session, "current_tab", selected = "NF")
+  })
+
+  reactive_sparqlentresult_FG = eventReactive(
+    eventExpr = {
+      (input$confirm_ent | input$sparqltaskFG  | input$runFG )  # add other condition that triggers query
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = TRUE,
+    valueExpr = {
+      req(FG_entity_1())
+      req(FG_entity_2())
+
+      if (TRUE) {
+        return(withProgress({
+          setProgress(message = "FG component sending SPARQL query to OKG. Please wait...")
+          print(paste0("START_DATE: ",input$dateRange2[1]))
+          print(paste0("END_DATE: ",input$dateRange2[2]))
+          entity1=FG_entity_1()
+          entity2=FG_entity_2()
+          #browser()
+          print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity1),">"))
+          print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity2),">"))
 
 
+          myresultFG= tryCatch(fg_analysis(ENTITY_1 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_1()),">"),
+                                  ENTITY_2 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_2()),">"),
+                                  START_DATE = input$dateRange2[1],
+                                  END_DATE = input$dateRange2[2]), error =function(e) {
+                                    showModal(modalDialog(paste("Error:","Not enough data in OKG. SPARQL query aborted. Please select another pair of entities"),easyClose = TRUE))
+                                    return()
+                                    })
+          if(is.null(myresultFG)){return(NULL)}
+          #browser()
+          if(length(unique(V(myresultFG$graph)$tweet_id))>=2){
+            random_tweet_ids_FG(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(V(myresultFG$graph)$tweet_id)[!is.na(unique(V(myresultFG$graph)$tweet_id))]))
+            print(random_tweet_ids_FG)
+          }
+          myresultFG
+        },
+        min = 0,
+        max = 2,
+        value = 1
+        ))}
+    }
+  )
 
-   FG_entity_1 <- reactive({input$myFG_entity_1 })
-   FG_entity_2 <- reactive({input$myFG_entity_2 })
+  reactive_FG_network = reactive({
+    #req(reactive_sparqlentresult_FG())
+    myresult<-reactive_sparqlentresult_FG()
+    #browser()
+    #if(length(myresult)!=3){return()}
+    myresult$visualization
+    # %>%
+    #   visEvents(selectNode = "function(nodes) {
+    #            Shiny.onInputChange('current_FGnode_id', nodes);
+    #          ;}") %>%
+    #   visEvents(selectEdge = "function(edges) {
+    #            Shiny.onInputChange('current_FGedge_id', edges);
+    #          ;}")
+  }
+  )
 
-   output$FG_entity_11 <- renderUI({
-     req(FG_entity_1())
-     myFG_entity_1=FG_entity_1()
-     selectInput("myFG_entity_11",
-                 "Selected entity A:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_1 ,selectize = TRUE)
-   })
-   output$FG_entity_22 <- renderUI({
-     req(FG_entity_2())
-     myFG_entity_2=FG_entity_2()
-     selectInput("myFG_entity_22",
-                 "Selected entity B:",
-                 choices = unique(reactive_sparqlentresult()$dbpedia_dict$label[!is.na(reactive_sparqlentresult()$dbpedia_dict$entityDB)]),selected = myFG_entity_2, selectize = TRUE)
-   })
-   #FG ENTETIES UPDATE BASED ON SELECTED NODE
-    observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
-req(input$current_BEnode_id$node)
-      req(input$myFG_entity_1)
-      #browser()
-      updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
+  output$FGresult <-renderVisNetwork(reactive_FG_network())
 
-    })
+  observeEvent(eventExpr = {
+    (input$sparqltaskFG | input$runFG)
+  },{
+    req(reactive_sparqlentresult_FG())
+    updateTabsetPanel(session, "current_tab", selected = "NF")
+    #browser()
+    sparqlLogFG({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult_FG()$url,"<br>",perl = T),sparqlLogFG() )})
+  }
+  )
 
-    observeEvent(is.character(input$current_BEnode_id$node) && input$current_BEnode_id$node!=""  , {
-      req(input$current_BEnode_id$node)
-      req(input$myFG_entity_11)
-      #browser()
-      updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("http://example.com/ent_","",input$current_BEnode_id$node)))
-
-    })
-
-    #FG ENTETIES UPDATE BASED ON SELECTED EDGES
-    observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
-      req(input$current_BEedge_id$edge)
-      req(input$myFG_entity_1)
-      req(input$myFG_entity_2)
-      #browser()
-      updateSelectInput(session, "myFG_entity_1", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
-
-      updateSelectInput(session, "myFG_entity_2", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
-
-    })
-
-    observeEvent(is.character(input$current_BEedge_id$edge) && input$current_BEedge_id$edge!=""  , {
-      req(input$current_BEedge_id$edge)
-      req(input$myFG_entity_11)
-      req(input$myFG_entity_22)
-      print(input$current_BEedge_id$edge)
-      #browser()
-      updateSelectInput(session, "myFG_entity_11", selected =gsub("_"," ",gsub("^http://example.com/ent_|<->.*$","",input$current_BEedge_id$edge)))
-
-      updateSelectInput(session, "myFG_entity_22", selected =gsub("_"," ",gsub("^.*<->http://example.com/ent_","",input$current_BEedge_id$edge)))
-
-    })
-
-#SYNCRO THE TWO UI INPUTS
-   observeEvent(input$myFG_entity_11, {
-     req(input$myFG_entity_11)
-     updateSelectInput(session, "myFG_entity_1", selected = input$myFG_entity_11)
-   })
-
-   observeEvent(input$myFG_entity_22, {
-     req(input$myFG_entity_22)
-     updateSelectInput(session,  "myFG_entity_2", selected = input$myFG_entity_22)
-   })
-
-#browser()
-
-   reactive_sparqlentresult_FG = eventReactive(
-     eventExpr = {
-       (input$sparqltaskFG  | input$runFG)  # add other condition that triggers query
-     },
-     ignoreNULL = TRUE,
-     ignoreInit = TRUE,
-     valueExpr = {
-       req(FG_entity_1())
-       req(FG_entity_2())
-       if (TRUE) {
-         return(withProgress({
-           setProgress(message = "FG component sending SPARQL query to OKG. Please wait...")
-           print(paste0("START_DATE: ",input$dateRange2[1]))
-           print(paste0("END_DATE: ",input$dateRange2[2]))
-           entity1=FG_entity_1()
-           entity2=FG_entity_2()
-           #browser()
-           print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity1),">"))
-           print(paste0("<http://dbpedia.org/resource/", gsub(" ","_",entity2),">"))
+  output$sparqlFGqueryURL= renderUI({
+    req(reactive_sparqlentresult_FG())
+    req(sparqlLogFG())
+    HTML(text = sparqlLogFG())
+  })
 
 
-           myresultFG= fg_analysis(ENTITY_1 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_1()),">"),
-                                 ENTITY_2 = paste0("<http://dbpedia.org/resource/", gsub(" ","_",FG_entity_2()),">"),
-                                 START_DATE = input$dateRange2[1],
-                                 END_DATE = input$dateRange2[2])
-           if(is.null(myresultFG)){return(NULL)}
-           # if(length(myresultFG)>=3){
-           #   random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresultFG$n_ent_by_id$id))))
-           # }
-           myresultFG
-         },
-         min = 0,
-         max = 2,
-         value = 1
-         ))}
-     }
-   )
-
-   reactive_FG_network = reactive({
-     req(reactive_sparqlentresult_FG())
-     myresult<-reactive_sparqlentresult_FG()
-     myresult$visualization
-     # %>%
-     #   visEvents(selectNode = "function(nodes) {
-     #            Shiny.onInputChange('current_FGnode_id', nodes);
-     #          ;}") %>%
-     #   visEvents(selectEdge = "function(edges) {
-     #            Shiny.onInputChange('current_FGedge_id', edges);
-     #          ;}")
-   }
-   )
-
-   output$FGresult <-renderVisNetwork(reactive_FG_network())
-   #reactive_sparqlentresult_FG()$visualization
-
-   # observeEvent(eventExpr = {
-   #   (input$sparqltaskFG | input$runFG)
-   #   #&& reactive_sparqlentresult()!=# add other condition that triggers query
-   # },{
-   #   req(reactive_sparqlentresult())
-   #   sparqlLog({paste0("<br><br><b>Query date: ",Sys.Date()," Query time: ",Sys.time(),"</b><br>",gsub(pattern = "\n |\\n ", replacement = "<br>", reactive_sparqlentresult()$my_request$url,"<br>",perl = T),sparqlLog() )})
-   # }
-   # )
-
-   #Sample tweets for selected entity
-   # observeEvent(eventExpr = is.character(input$current_FGnode_id$node) && input$current_FGnode_id$node!="" ,{
-   #   # require(input$current_FGnode_id$node)
-   #   myresult= reactive_sparqlentresult()
-   #   random_tweet_ids(sample(gsub(pattern = "http://example.com/tweet_",replacement = "",unique(myresult$answer_final$id[myresult$answer_final$entity==input$current_FGnode_id$node]))))
-   # }
-   # )
-
+  output$render_tweet1_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[1])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet2_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[2])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet3_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[3])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet4_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[4])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet5_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[5])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet6_sampleFG <-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/",random_tweet_ids_FG()[6])))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
   ##### COMPONENT 3: SUMMARY STATS #####
 
   ##### COMPONENT 4: CASE STUDIES #####
@@ -1757,7 +1768,7 @@ req(input$current_BEnode_id$node)
   ###### CASE STUDY 4: #####
 
   ##### #################################################### WIP
-   ###### Hermione on right panel (clickableable) ####
+  ###### Hermione on right panel (clickableable) ####
   # observeEvent(input$controlbar, {
   #  output$hermione_control <- renderImage({
   #    img("https://avataaars.io/?avatarStyle=Transparent&topType=Turban&accessoriesType=Round&hatColor=Blue03&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=RaisedExcitedNatural&mouthType=Twinkle&skinColor=Light")
@@ -1765,7 +1776,7 @@ req(input$current_BEnode_id$node)
   # })
 
   ##### Selected rows DTnodes #####
- #  output$test = renderPrint({
- # cat(input[["DTnodes_rows_selected"]], sep = ', ')
- #  })
+  #  output$test = renderPrint({
+  # cat(input[["DTnodes_rows_selected"]], sep = ', ')
+  #  })
 }
