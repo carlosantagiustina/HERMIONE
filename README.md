@@ -1,6 +1,9 @@
 
 - <a href="#hermione" id="toc-hermione">Hermione</a>
   - <a href="#installation" id="toc-installation">Installation</a>
+  - <a href="#dockerized-version-of-hermione-app"
+    id="toc-dockerized-version-of-hermione-app">Dockerized version of
+    HERMIONE app</a>
   - <a href="#how-to-run-the-hermione-dashboard"
     id="toc-how-to-run-the-hermione-dashboard">How to run the Hermione
     dashboard</a>
@@ -35,28 +38,72 @@ inequality from different perspectives.
 You can install the development version of Hermione from GitHub (main
 branch) as follows:
 
+1.  Install R (Version 4.2.2 or later) from here
+    <https://cran.r-project.org/bin/>
+
+2.  Install R dependencies
+
+<!-- -->
+
+    R -e 'install.packages("remotes")'
+     Rscript -e 'remotes::install_version("httr",upgrade="never", version = "1.4.5")'
+     Rscript -e 'remotes::install_version("bslib",upgrade="never", version = "0.4.2")'
+     Rscript -e 'remotes::install_version("rmarkdown",upgrade="never", version = "2.20")'
+     Rscript -e 'remotes::install_version("knitr",upgrade="never", version = "1.41")'
+     Rscript -e 'remotes::install_version("promises",upgrade="never", version = "1.2.0.1")'
+     Rscript -e 'remotes::install_version("shiny",upgrade="never", version = "1.7.4")'
+     Rscript -e 'remotes::install_version("ggplot2",upgrade="never", version = "3.4.0")'
+     Rscript -e 'remotes::install_version("config",upgrade="never", version = "0.3.1")'
+     Rscript -e 'remotes::install_version("waiter",upgrade="never", version = "0.2.5")'
+     Rscript -e 'remotes::install_version("fresh",upgrade="never", version = "0.2.0")'
+     Rscript -e 'remotes::install_version("testthat",upgrade="never", version = "3.1.6")'
+     Rscript -e 'remotes::install_version("spelling",upgrade="never", version = "2.2.1")'
+     Rscript -e 'remotes::install_version("shiny.semantic",upgrade="never", version = "0.4.3")'
+     Rscript -e 'remotes::install_version("tidytext",upgrade="never", version = "0.4.1")'
+     Rscript -e 'remotes::install_version("visNetwork",upgrade="never", version = "2.1.2")'
+     Rscript -e 'remotes::install_version("ipc",upgrade="never", version = "0.1.4")'
+     Rscript -e 'remotes::install_version("tidyverse",upgrade="never", version = "1.3.2")'
+     Rscript -e 'remotes::install_version("DT",upgrade="never", version = "0.27")'
+     Rscript -e 'remotes::install_version("echarts4r",upgrade="never", version = "0.4.5")'
+     Rscript -e 'remotes::install_version("shinyjs",upgrade="never", version = "2.1.0")'
+     Rscript -e 'remotes::install_version("shinyWidgets",upgrade="never", version = "0.7.6")'
+     Rscript -e 'remotes::install_version("future",upgrade="never", version = "1.30.0")'
+     Rscript -e 'remotes::install_version("golem",upgrade="never", version = "0.3.5")'
+     Rscript -e 'remotes::install_version("bs4Dash",upgrade="never", version = "2.2.1")'
+     Rscript -e 'remotes::install_version("quanteda",upgrade="never", version = "3.2.4")'
+     Rscript -e 'remotes::install_version("quanteda.textplots",upgrade="never", version = "0.94.2")'
+     Rscript -e 'remotes::install_version("fmsb",upgrade="never", version = "0.7.5")'
+     Rscript -e 'remotes::install_github("lgnbhl/textyle@8bb208e52dcc6e364b6f903283c319f67d9980be")'
+
+3.  Install HERMIONE package
+
 ``` r
 library(remotes)
 remotes::install_github("carlosantagiustina/HERMIONE")
 ```
-The app requires a token to access the backend (Observatory Knwledge Graph).
-The app searches for a .tex file containing the token at the following path.
 
-/Users/[your-username]/HERMIONE_KEY.txt
+The app requires a token to access the backend (Observatory Knwledge
+Graph). You can request a token writing an email to
+<carlo.santagiustina@univiu.org>. The app searches for a .txt file
+containing the token at the following path:
+/Users/\[your-username\]/HERMIONE_KEY.txt
 
 which is equivalent to the output of the R code:
 
 ``` r
 paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")
 ```
-Hermione is also available in a dockerized version.
-To build the docker container please use the following command from the main folder of the project using your terminal/bash/console:
 
-```console
-docker build . -t hermione 
+## Dockerized version of HERMIONE app
 
- docker run -p 127.0.0.1:8080:80 hermione
-```
+Hermione is also available in a dockerized version. To build the docker
+container please use the following command from the main folder of the
+project using your terminal/bash/console:
+
+    docker build . -t hermione 
+
+     docker run -p 127.0.0.1:8080:80 hermione
+
 ## How to run the Hermione dashboard
 
 This is a basic example which shows you how to solve a common problem:

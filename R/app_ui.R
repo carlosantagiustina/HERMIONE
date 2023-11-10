@@ -269,7 +269,7 @@ my_theme = fresh::create_theme(
                         column(width = 6,
                                div(
                               infoBox(width = 12,title = "",icon =icon(  "users"),value = HTML(
-                                 "<h4> Inequalities in society can take many forms - from income and wealth disparities, to discrimination based on etchnicity, gender, age, religion and other factors.</h4>"
+                                 "<h4> Inequalities in society can take many forms - from income and wealth disparities, to discrimination based on ethnicity, gender, age, religion and other factors.</h4>"
                                ),color = "gray"))),
                         column(width = 6,
                                HTML(
