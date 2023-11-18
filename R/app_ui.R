@@ -70,6 +70,7 @@ my_theme = fresh::create_theme(
   #### APP UI ####
   app_ui <- function(request){
     tagList(
+      useShinyjs(),
       # Leave this function for adding external resources
       golem_add_external_resources(),
       tags$link(rel="stylesheet",
@@ -78,7 +79,7 @@ my_theme = fresh::create_theme(
     tags$head(tags$script(async = NA, src = "https://platform.twitter.com/widgets.js")),
       # Your application UI logic
       bs4Dash::dashboardPage(
-        useShinyjs(),
+        #useShinyjs(),
         preloader = list(
           html = tagList(
             waiter::spin_half(),
@@ -102,6 +103,8 @@ my_theme = fresh::create_theme(
           fixed = TRUE,
           border = TRUE,
           compact = FALSE,
+          controlbarIcon = tags$img(src = 'www/hermione/0_smile.png',
+                                    width = "30px"),
           sidebarIcon = tags$img(src = 'https://muhai.univiu.org/images/headers/MUHAI_favicon.png',
                                  width = "30px"),
           title = tags$a(
@@ -225,7 +228,7 @@ my_theme = fresh::create_theme(
                   icon = icon("gears")
                 ),
                 valueBox(
-                  value = h4("8,892,244"),
+                  value = h4("9,243,293"),
                   subtitle = "Extracted semantic triples",
                   color = "danger",
                   icon = icon("info"),
@@ -397,7 +400,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             ),
                             bs4Dash::box(
                               title = "Sample of Tweets matching Query",
-                              width = 12,collapsed = T,
+                              width = 12,collapsed = F,
                               HTML("<b>Select a node in the BE network here above to see a sample of posts referring to that entity</b><i> (Gray square: posts from accounts that don't exist any more or posts that are hidden for privacy and GDPR compliance; Not found: posts that have been deleted by their author)</i>"),
                               #div(uiOutput("render_tweets_sample")),
                               div(fluidRow(uiOutput("render_tweet1_sample"),
@@ -420,18 +423,18 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               width = 12,collapsed = T,
                               div(uiOutput("sparqlBEqueryURL"),style="font-size: 12px;")
                               #, footer = "Advanced parameters for tweeking HERMIONE"
-                            ),
-                            bs4Dash::box(width = 12,
-                                    title = "Selected Nodes and Edges",collapsed = T,
-                                    {
-                                   div(HTML("<br>Selected node:<br>")
-                                  ,verbatimTextOutput("return_BE_node")
-                                  ,HTML("Selected edge:<br>")
-                                  ,verbatimTextOutput("return_BE_edge")
-                                    )}
-
-
-                                    )
+                            )
+                            # ,bs4Dash::box(width = 12,
+                            #         title = "Selected Nodes and Edges",collapsed = T,
+                            #         {
+                            #        div(HTML("<br>Selected node:<br>")
+                            #       ,verbatimTextOutput("return_BE_node")
+                            #       ,HTML("Selected edge:<br>")
+                            #       ,verbatimTextOutput("return_BE_edge")
+                            #         )}
+                            #
+                            #
+                            #         )
                             ,color="primary")
                             )),
                           sidebar = boxSidebar(
@@ -517,7 +520,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               ),
                               bs4Dash::box(
                                 title = "Sample of Tweets matching Query",
-                                width = 12,collapsed = T,
+                                width = 12,collapsed = F,
                                 HTML("<b>Sample of tweets referring to the selected pair of entities</b><i> (gray squares: posts from accounts that don't exist any more or are hidden for privacy compliance; Not found: posts that have been deleted by their author)</i>")
                                 ,div(uiOutput("render_tweets_sample")),
                                 div(fluidRow(uiOutput("render_tweet1_sampleFG"),
@@ -789,8 +792,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
             skin = "light",
             width = golem::get_golem_options("controlbar_width"),
             collapsed = TRUE,
+            #icon= shiny::icon("gears"),
             pinned = FALSE,
-            overlay = TRUE,
+            overlay = FALSE,
             bs4Dash::box(
               title = textyle(tags$p("HERMIONE's control room", style = "font-size:2rem;font-weight:200;"),transition = "100",delay = "50",duration = "100",color = "#ffd100"),
               footer = "Tell HERMIONE what to do by setting the parameters for your exploration",
@@ -803,27 +807,29 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                     position: relative;"
                 ,
                    fluidRow(
-                   column(width = 6,offset = 0,
+                   column(width = 4,offset = 0,
                    img(
                      src = "www/hermione/0_smile.png",
                      style = "display: block;
-                              float:left;
+                              float:right;
                               width:100%;
-                              min-width : 200px;
-                              max-width : 200px;
+                              min-width : 150px;
+                              max-width : 250px;
                               margin-left:0%;
-                              margin-right:-12%;"
+                              margin-right:0%;"
                    )),
-                   column(width = 6,offset = 0,br(),
+                   column(width = 8,offset = 0,
+                          br(),
+                          fluidRow(align = 'right',div(
+                            actionButton(label = "< Previous", "Hpre",width = "100",style="margin-left: 2em"),
+                            actionButton(label = "Next >", "Hnext",width = "100"))),
                    span(div(uiOutput("controlroom_text"),id="iphermione"),
                         style = "
                         position: relative;
-                        min-width : 200px;"
+                        min-width : 250px;"
 
-                   ),   br(),
-                   fluidRow(align = 'right',div(
-                   actionButton(label = "< Previous", "Hpre",width = "100",style="margin-left: 2em"),
-                   actionButton(label = "Next >", "Hnext",width = "100")))
+                   )
+
                  )))},
               br(),
               #visNetworkOutput("result",height = "600px",width = "100%"),

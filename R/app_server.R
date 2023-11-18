@@ -1024,11 +1024,12 @@ fg_analysis=function(QUERY=QUERY_FG,
 ##### Hermione Controlroom text ####
 
 hermione_controlroom_text=c("
-Hi! as you may have guessed this is my control room, through which you can navigate and steer the analysis of data about inequality collected from Twitter by the MUHAI project, and enriched through the Observatory Knowledge Graph (OKG). Click [Next>] to continue this tutorial...",#1
-                            "If you wish to access additional information about a specific tool, close the control room by clicking on the grid in the top-right corner of this UI. Then, click the [i] button located in the top-right corner of the UI of the tool you are interested in. Click [Next>] to continue this tutorial...",#2
-                            "Let's start from the Bird's-Eye network exploration tool. By customizing the parameters here below and on the UI on the left, you can create your own perspectives on the Observatory Knowledge Graph data about inequaltiy. Click [Next>] to continue this tutorial...",#3
-                            "For example, by inserting the name of one or more entities in the text input on top of the UI on the left, you can filter the data to keep only tweets that contain one or more entities matching you Regular Expression (RegEx) filter. I have inserted 'Racism' for you as RegEx filter, please click [Run] on the UI on the left to launch the SPARQL query and then click [Next>] to continue this tutorial...",#4
-  "Trough the UI on the left [Entity in Tweet RegEx filter] you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool. Click [Next>] to continue this tutorial...",
+Hi! this is HERMIONE's control room, through which you can navigate and steer the analysis of data about inequality collected from Twitter, and enriched through the Observatory Knowledge Graph (OKG). Click [Next>] to continue this tutorial...",#1
+                            "If you wish to access additional information about a specific tool, close the control room by clicking on the HERMIONE portrait in the top-right corner of this UI. Then, click the [i] button located in the top-right corner of the UI of the tool you are interested in. Click [Next>] to continue this tutorial...",#2
+                            "Let's start from the Bird's-Eye network exploration tool. By customizing the parameters here below and on the UI on the left, you can create your own perspectives on the Observatory Knowledge Graph data. Click [Next>] to continue this tutorial...",#3
+                            "For example, by inserting the name of one or more entities in the text input bar [Entity in Tweet RegEx filter] on top of the UI on the left, you can filter the data to keep only tweets that contain one or more entities matching you Regular Expression (RegEx) filter. I have inserted 'Racism' for you as RegEx filter, By clicking [Run] on the UI on the left you can launch the SPARQL query. Click [Next>] to continue this tutorial and I will launch the query for you...",#4
+                            "As you can see on the left, HERMIONE has created a Bird's-eye network based on the provided parameters. The network displays entities that occur and co-occur more frequently in tweets that match your query. Entities matched to the DBpedia KG [square nodes] can be explored by double-clicking on them. You can also select an entity by clicking on it to retrieve, in real-time, a random sample of posts in the OKG related to the selected entity, as you would see them on Twitter/X. Additionally, you can click on URLs in the posts to explore related content.",#5
+  "Trough the UI on the left [Entity in Tweet RegEx filter] you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool. Click [Next>] to continue this tutorial...",#6
                             "Text 6",
                             "Text 7",
                             "Text 8",
@@ -1091,7 +1092,12 @@ app_server <- function(input, output, session) {
 
     #Insert regEx filter in the Bird Eye Network and run query
     if(hermione_controlroom$step==4){
-      updateTextInput(session,inputId =  "entityfilter",value = "Racism" )
+      updateTextInput(session,inputId =  "entityfilter",value = "Racism")
+      #shinyjs::click()
+    }
+    #Insert regEx filter in the Bird Eye Network and run query
+    if(hermione_controlroom$step==5){
+      shinyjs::click("sparqltaskBE")
     }
 
   }
