@@ -262,7 +262,7 @@ my_theme = fresh::create_theme(
                       HTML(
                       "<body><center><h1>Welcome to MUHAI's HERMIONE dashboard!</h1><br><img src='www/inequality.png' alt='ImageInequality' style='width:25%;'></center><br><br></h4></body>"),
                       fluidRow(HTML(
-                        "<h4> Join us as we explore the data, events, narratives, and perspectives that can help us to better understand the complex and nuanced nature of inequality in our contemporary world.</h4>"
+                        "<h4> Join us as we explore the data, events, narratives, and perspectives that can enhance our understanding of intersectionality and the multifaceted nature of inequality in our contemporary world.</h4>"
                       )),
                       br(),
                       fluidRow(

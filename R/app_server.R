@@ -1023,11 +1023,16 @@ fg_analysis=function(QUERY=QUERY_FG,
 
 ##### Hermione Controlroom text ####
 
-hermione_controlroom_text=c("Hi, here below you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool. Click Next > to continue...",
-                            "Text 2",
-                            "Text 3",
-                            "Text 4",
-                            "NF Text 5"
+hermione_controlroom_text=c("
+Hi! as you may have guessed this is my control room, through which you can navigate and steer the analysis of data about inequality collected from Twitter by the MUHAI project, and enriched through the Observatory Knowledge Graph (OKG). Click [Next>] to continue this tutorial...",#1
+                            "If you wish to access additional information about a specific tool, close the control room by clicking on the grid in the top-right corner of this UI. Then, click the [i] button located in the top-right corner of the UI of the tool you are interested in. Click [Next>] to continue this tutorial...",#2
+                            "Let's start from the Bird's-Eye network exploration tool. By customizing the parameters here below and on the UI on the left, you can create your own perspectives on the Observatory Knowledge Graph data about inequaltiy. Click [Next>] to continue this tutorial...",#3
+                            "For example, by inserting the name of one or more entities in the text input on top of the UI on the left, you can filter the data to keep only tweets that contain one or more entities matching you Regular Expression (RegEx) filter. I have inserted 'Racism' for you as RegEx filter, please click [Run] on the UI on the left to launch the SPARQL query and then click [Next>] to continue this tutorial...",#4
+  "Trough the UI on the left [Entity in Tweet RegEx filter] you can set the parameters for creating your own perspective on the OKG data! Start from the Bird's-Eye network exploration tool. Click [Next>] to continue this tutorial...",
+                            "Text 6",
+                            "Text 7",
+                            "Text 8",
+                            "Text 9"
 )
 
 #reactive_sparqlentresult=query_and_build_net()
@@ -1073,16 +1078,25 @@ app_server <- function(input, output, session) {
     if(hermione_controlroom$step<length(hermione_controlroom_text)){
       hermione_controlroom$step=hermione_controlroom$step+1
     }
-    if(hermione_controlroom$step>1 & hermione_controlroom$step<5){
+
+    #Bird Eye Network tutorial
+    if(hermione_controlroom$step>1 & hermione_controlroom$step<6){
       updateTabsetPanel(session, "current_tab", selected = "DO")
     }
-    if(hermione_controlroom$step>4){
+
+    #Fine Grained view tutorial
+    if(hermione_controlroom$step>=6){
       updateTabsetPanel(session, "current_tab", selected = "NF")
     }
 
+    #Insert regEx filter in the Bird Eye Network and run query
+    if(hermione_controlroom$step==4){
+      updateTextInput(session,inputId =  "entityfilter",value = "Racism" )
+    }
 
   }
   )
+
   #previous step
   observeEvent(eventExpr = input$Hpre ,{
     req(input$Hpre)
@@ -1090,8 +1104,11 @@ app_server <- function(input, output, session) {
       hermione_controlroom$step=hermione_controlroom$step-1
     }
 
+
+
   }
   )
+
   output$controlroom_text=renderUI({textyle(tags$p(hermione_controlroom_text[hermione_controlroom$step]),delay = "100",duration = "100",color = "black", class = "ex1")})
 
   ###### HERMIONE AVATAR IMAGE FILES ####
