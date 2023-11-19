@@ -216,30 +216,34 @@ my_theme = fresh::create_theme(
                 ######## Value Boxes ########
                 valueBox(
                   value = h4("62,015"),
-                  subtitle = "Sampled tweets about inequality",
+                  subtitle = "Sample of tweets about inequality",
                   color = "primary",
+                  href = "https://developer.twitter.com/en/use-cases/do-research",
                   icon = icon("twitter"),
-                  footer = div(paste0("latest update: ", Sys.Date()))
+                  #footer = div(paste0("latest update: ", Sys.Date()))
                 ),
                 valueBox(
                   value = h4("ML ⋅ NLP ⋅ FCG ⋅ KG"),
-                  subtitle = "combined AI methods",
+                  subtitle = "Combined MUHAI methods",
+                  href = "https://www.muhai.org/output",
                   color = "indigo",
                   icon = icon("gears")
                 ),
                 valueBox(
                   value = h4("9,243,293"),
-                  subtitle = "Extracted semantic triples",
+                  subtitle = "Semantic triples in the OKG",
+                  href = "https://dml.uni-bremen.de/muhai/kg.html",
                   color = "danger",
                   icon = icon("info"),
-                  footer =  div(paste0("latest update: ", Sys.Date()))
+                  #footer =  div(paste0("latest update: ", Sys.Date()))
                 ),
                 valueBox(
                   value = h4("3,592"),
-                  subtitle = "Links to DBpedia KG",
+                  subtitle = "Links to the DBpedia KG",
                   color = "teal",
+                  href = "https://www.dbpedia.org/",
                   icon = icon("link"),
-                  footer =  div(paste0("latest update: ", Sys.Date()))
+                 # footer =  div(paste0("latest update: ", Sys.Date()))
                 )
               ),
               fluidRow(column(

@@ -575,7 +575,8 @@ QUERY_FG =
   '
 SELECT DISTINCT ?ent1 ?entityDB1 ?entityMention1 ?ent2 ?entityDB2 ?entityMention2 ?date  ?id ?token ?word ?pos ?index ?dep_prop ?token_dep ?index_dep ?word_dep  ?entity ?entityDB ?refers_to ?tokenrole ?arg
 WHERE {
-  ?id schema:mentions ?entityMention1 .
+  ?id schema:mentions ?entityMention1 ;
+      dc:created ?date_time .
   ?ent1 nif:anchorOf ?entityMention1 ;
         nee:hasMatchedURL ?entityDB1 .
   ?ent1 nee:hasMatchedURL ::ENTITY_1:: .
@@ -599,6 +600,9 @@ WHERE {
     OPTIONAL{ ?role_inst wsj:onRoleSet ?tokenrole ;
                        observatory:onToken ?token ;
                        wsj:withmappedrole ?arg . }
+          FILTER (
+        "::START_DATE::"^^xsd:dateTime < ?date_time &&
+          ?date_time < "::END_DATE::"^^xsd:dateTime )
 }
 ORDER BY DESC(?id)
 limit 500
