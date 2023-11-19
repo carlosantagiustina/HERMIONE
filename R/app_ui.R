@@ -223,7 +223,7 @@ my_theme = fresh::create_theme(
                   #footer = div(paste0("latest update: ", Sys.Date()))
                 ),
                 valueBox(
-                  value = h4("ML ⋅ NLP ⋅ FCG ⋅ KG"),
+                  value = h4("ML⋅NLP⋅FCG⋅KG"),
                   subtitle = "Combined MUHAI methods",
                   href = "https://www.muhai.org/output",
                   color = "indigo",
@@ -239,7 +239,7 @@ my_theme = fresh::create_theme(
                 ),
                 valueBox(
                   value = h4("3,592"),
-                  subtitle = "Links to the DBpedia KG",
+                  subtitle = "Entities linked to the DBpedia KG",
                   color = "teal",
                   href = "https://www.dbpedia.org/",
                   icon = icon("link"),
@@ -820,20 +820,26 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                               min-width : 150px;
                               max-width : 250px;
                               margin-left:0%;
-                              margin-right:0%;"
+                              margin-right:0%;
+                              vertical-align: middle;"
                    )),
                    column(width = 8,offset = 0,
-                          br(),
-                          fluidRow(align = 'right',div(
-                            actionButton(label = "< Previous", "Hpre",width = "100",style="margin-left: 2em"),
-                            actionButton(label = "Next >", "Hnext",width = "100"))),
+                          fluidRow(column(12, align="center",div(
+                            actionButton(label = "< Previous", "Hpre",width = "100"
+                                         #,style="margin-left: 2em"
+                                         ),
+                            actionButton(label = "Next >", "Hnext",width = "100")
+                            ))),
                    span(div(uiOutput("controlroom_text"),id="iphermione"),
                         style = "
                         position: relative;
                         min-width : 250px;"
 
-                   )
-
+                   ),
+                   fluidRow(column(12, align="center",div(
+                     actionButton(label = "Reset and quit tutorial", "exit_t",width = "200"
+                                 # ,style="margin-left: 2em"
+                                  ))))
                  )))},
               br(),
               #visNetworkOutput("result",height = "600px",width = "100%"),
@@ -883,10 +889,20 @@ Additionally, web observatories can be used by researchers, citizens, businesses
           #### UI - FOOTER ####
           footer = bs4Dash::dashboardFooter(
             fixed = TRUE,
-            left = a(href = "https://twitter.com/MUHAI_org",
-                     target = "_blank", "@MUHAI_org"),
+            left = div(a(href = "https://www.muhai.org/",
+                                              target = "_blank", "Website: MUHAI.org"),
+                       br(),
+              a(href = "https://twitter.com/MUHAI_org",
+                     target = "_blank", "Twitter: @MUHAI_org"),
+              br(),
+                     a(href = "https://www.linkedin.com/company/muhai/",
+                       target = "_blank", "LinkedIn: MUHAI"),
+              br(),
+              a(href = "https://dml.uni-bremen.de/muhai/index.html",
+                target = "_blank", "MUHAI Social Inequality Observatory")
+                     ),
             right = HTML(
-              '<center><img src="https://muhai.org/images/headers/euflag.png" alt="" style="width:100px;"></center><br><par style="font-size:70%;">This project has received funding<br> from the European Union’s Horizon 2020<br> research and innovation programme<br> under grant agreement No 951846</par>'
+              '<center><img src="https://muhai.org/images/headers/euflag.png" alt="" style="width:100px;"></center><par style="font-size:70%;"><a href="https://cordis.europa.eu/project/id/951846">This project has received funding<br> from the European Union’s Horizon 2020<br> research and innovation programme<br> under grant agreement No 951846</a></par><br><br>'
             )
           ),
           title = "MUHAI Inequality Observatory"

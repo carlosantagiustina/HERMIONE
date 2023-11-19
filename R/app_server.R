@@ -1031,10 +1031,10 @@ hermione_controlroom_text=c("[Step 1] Hi! this is HERMIONE's control room, throu
                             "[Step 2] If you wish to access additional information about a specific tool, close the control room by clicking on the HERMIONE portrait in the top-right corner of this UI. Then, click the [i] button located in the top-right corner of the UI of the tool you are interested in. Click [Next>] to continue this tutorial...",#2
                             "[Step 3] Let's start from the Bird's-Eye network exploration tool. By customizing the parameters here below and on the UI on the left, you can create your own perspectives on the Observatory Knowledge Graph data. Click [Next>] to continue this tutorial...",#3
                             "[Step 4] By inserting the name of one or more entities in the text input bar [Entity in Tweet RegEx filter] on top of the UI on the left, you can filter the data to keep only tweets that contain one or more entities matching you Regular Expression (RegEx) filter. For example, I have now inserted 'Racism' for you. By clicking [Run] on the UI on the left you can launch the SPARQL query. Click [Next>] to continue this tutorial and I will launch the query for you...",#4
-                            "[Step 5] As you can see on the left, HERMIONE has created a Bird's-eye network based on the provided filtering condition (i.e., the tweet mentions the entity: 'Racism'). The network displays entities that occur and co-occur more frequently in tweeets that match your filter. Matched entities from the DBpedia KG [square nodes] can be explored by double-clicking on them. You can also select an entity (by clicking on it once) to retrieve in real-time a random sample of posts in the OKG related to the selected entity. HERMIONE displays them below the network as you would see them on Twitter/X. Additionally, you can click on the URLs in the posts to explore contents and redirect links.",#5
-  "[Step 6] You can also ask HERMIONE to filter OKG data by dates, allowing you to focus attention on a specific period of interest. For instance, I have inputted the date range for you (see the date selection tool below) for the month of June 2020. During this time, protests against racial discrimination following the death of George Floyd spread across the United States and Europe. Click [Next>] to continue this tutorial and I will launch the new query for you..",#6
-                            "[Step 7] Text about results of BE query filtered by date",
-                            "[Step 8] Pair of entity selection for birds eye view",
+                            "[Step 5] As you can see on the left, HERMIONE has created a Bird's-eye network based on the provided filtering condition (i.e., retrieved tweets mention the entity: 'Racism'). The network displays entities that occur and co-occur more frequently in tweeets that match your filter. Matched entities from the DBpedia KG [square nodes] can be explored by double-clicking on them. You can also select an entity (by clicking on it once) to retrieve in real-time a random sample of posts in the OKG related to the selected entity. HERMIONE displays them below the network as you would see them on Twitter/X. Additionally, you can click on the URLs in the posts to explore contents and redirect links.",#5
+  "[Step 6] You can also ask HERMIONE to filter OKG data by dates, allowing you to focus attention on a specific period of interest. For instance, I have just inputted here below the date range for selecting the month of June 2020. During this time, protests against racial discrimination following the death of George Floyd spread across the United States and Europe. Click [Next>] to continue this tutorial and I will launch this query for you..",#6
+                            "[Step 7] As shown in the filtered Bird's-eye network, in addition to 'Racism', the most relevant entity in terms of mentions during the considered period is 'Institutional Racism'. You can now focus the analysis on a specific relationship between two entities through the Fine-Grained View, like: 'Institutional Racism' and 'Black Lives Matter'. By selecting an edge of the Bird's-eye network, or by chosing them through the [Selected entity A] and [Selected entity B] filter, you can select a pair on entities to be used to construct the Fine-Grained View, provided that the number of relationships between the two during the considered period is sufficient. Click [Next>] to continue this tutorial and I will launch the Fine-Grained View query for the two selected entities..",
+                            "[Step 8] The Fine-Grained View allows to explore, in greater detail, how the two selected entities are associated through aad-hoc narratives in people's posts published during the specified time frame, and which frames are used to relate them.",
                             "[Step 9] Text about results of FG query filtered by date",
                             "[Step 10] Text about frame / entity  / tweet selection and filtering in the FG view"
 )
@@ -1076,6 +1076,22 @@ app_server <- function(input, output, session) {
   ##### HERMIONE ####
 
   ##### HERMIONE CONTROLROOM TUTORIAL #####
+  shiny::observeEvent(input$exit_t, {
+    #updateControlbar(id = "controlbar")
+    #browser()
+    if(hermione_controlroom$step>=2){
+      shinyjs::click("controlbarPin")
+    }
+    hermione_controlroom$step=1
+    reset(id = "entityfilter")
+    reset(id = "dateRange2")
+    reset(id = "myFG_entity_1")
+    reset(id = "myFG_entity_2")
+    reset(id = "slider_nentites")
+    reset(id = "slider_nmaxrows")
+    updateTabsetPanel(session, "current_tab", selected = "intro")
+    shinyjs::click("controlbar")
+  })
   #next step
   observeEvent(eventExpr =  input$Hnext ,{
     req(input$Hnext)
@@ -1084,12 +1100,12 @@ app_server <- function(input, output, session) {
     }
 
     #Bird Eye Network tutorial
-    if(hermione_controlroom$step>2 & hermione_controlroom$step<6){
+    if(hermione_controlroom$step>2 & hermione_controlroom$step<7){
       updateTabsetPanel(session, "current_tab", selected = "DO")
     }
 
     #Fine Grained view tutorial
-    if(hermione_controlroom$step>=8){
+    if(hermione_controlroom$step>=9){
       updateTabsetPanel(session, "current_tab", selected = "NF")
     }
     if(hermione_controlroom$step==2){
@@ -1106,20 +1122,23 @@ app_server <- function(input, output, session) {
     }
     if(hermione_controlroom$step==6){
       updateTextInput(session,inputId =  "entityfilter",value = "Racism")
-      updateDateRangeInput(session,inputId =  "dateRange2",start = "01-06-2020",end = "30-06-2020")
+      updateDateRangeInput(session,inputId =  "dateRange2",start =  as.Date("2020-06-01"),end = as.Date("2020-06-30"))
       #shinyjs::click()
     }
     if(hermione_controlroom$step==7){
       shinyjs::click("sparqltaskBE")
     }
     if(hermione_controlroom$step==8){
-
+      updateSelectInput(session, "myFG_entity_1", selected ="Institutional Racism")
+      updateSelectInput(session, "myFG_entity_2", selected ="Black Lives Matter")
     }
 
     if(hermione_controlroom$step==9){
       shinyjs::click("sparqltaskFG")
     }
+    if(hermione_controlroom$step==10){
 
+    }
 
   }
   )
