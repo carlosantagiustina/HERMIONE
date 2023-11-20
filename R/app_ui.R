@@ -789,19 +789,77 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 solidHeader = TRUE,
                                 type = "tabs",
                                 status = "primary",
-                                selected = "Frontend",
+                                selected = "Contacts & devs",
+                                ###### a) frontend info ####
                                 tabPanel("Frontend",
-                                         HTML("<h4>The frontend: HERMIONE</h4>HERMIONE, <a href='https://github.com/carlosantagiustina/HERMIONE/'>open source code on GitHub here</a>, is an interactive dashboard developed in R and Shiny. <br>Shiny in a R library for building UIs for data exploration and analysis performed in realtime. <br> HERMIONE's interactive network visualizations have been created using Vis.js.<br>To standardize the dashboard and its components the <a href='https://thinkr-open.github.io/golem/'> R Golem framework</a> was used. <br>This framework allows to install and deploy the dashboard as if it was a R package or a Docker container.")
-                                )
+                                         HTML("<h3>The frontend: HERMIONE</h3>"),
+                                         fluidRow(column(width = 5,HTML("<h4>HERMIONE, <a href='https://github.com/carlosantagiustina/HERMIONE/'>open source code on GitHub here</a>, is an interactive dashboard developed in R and Shiny. <br><br> Shiny in a R library for building UIs for data exploration and analysis performed in realtime. <br><br>  HERMIONE's interactive network visualizations have been created using Vis.js.<br><br> To standardize the dashboard and its components the <a href='https://thinkr-open.github.io/golem/'> R Golem framework</a> was used. <br><br>This framework allows to install and deploy the dashboard as if it was a R package or a Docker container.</h4>")
+                                         ),
+                                           column(width = 7,
+                                         bs4Carousel(
+                                           id = "frontendcarousel",
+                                           bs4CarouselItem(
+                                             caption = "Hermione UI",
+                                             tags$img(src = "www/home.png",style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 750px;
+                              vertical-align: middle;")
+                                           ),
+                                           bs4CarouselItem(
+                                             caption = "Bird's-eye perspective",
+                                             tags$img(src = "www/birds_eye.png",style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 750px;
+                              vertical-align: middle;")
+                                           ),
+                                           bs4CarouselItem(
+                                             caption = "Fine Grained View",
+                                             tags$img(src = "www/fine_grained.png",style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 750px;
+                              vertical-align: middle;")
+                                           )
+                                         ))
+                                ))
+                                ###### b) backend info ####
                                 ,tabPanel("Backend",
-                                         HTML("<h4>The backend: OKG & OBIO</h4>HERMIONE uses as database and back-end the Observatory Knowledge Graph, which has been deployed within the datalegend infrastructure, part of the Clariah project, hosted at TriplyDB. For details about the OKG ontology, called OBIO, refer to  <a href='https://muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html'>muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html</a><br>
-HERMIONE queries dynamically the OKG through templated SPARQL queries based on users’ inputs. ")
-                                )
+                                          HTML("<h3>The backend: OKG & OBIO</h3>"),
+                                          fluidRow(column(width = 5,HTML("<h4>HERMIONE uses as database and back-end the Observatory Knowledge Graph, which has been deployed within the datalegend infrastructure, part of the Clariah project, hosted at TriplyDB.<br> For details about the OKG ontology, called OBIO, refer to:<br><br>    <a href='https://muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html'>muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html</a><br><br>
+HERMIONE queries dynamically the OKG through templated SPARQL queries based on users’ inputs.</h4>")
+                                          ),
+                                          column(width = 7,carousel(
+                                            id = "backendcarousel",
+                                            bs4CarouselItem(
+                                              caption = "The Observatory Integrated Ontology (OBIO)",
+                                              tags$img(src = "www/obio_schema.svg"
+                                              ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 750px;
+                              vertical-align: middle;")
+                                            ),
+                                            bs4CarouselItem(
+                                              caption = "Example of SPARQL query generated by HERMIONE",
+                                              tags$img(src = "www/query.png"
+                                                       ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 750px;
+                              vertical-align: middle;")
+                                            )
+                                          ))
+                                         ))
+                                ###### c) ecosystem ####
                                 ,tabPanel("Ecosystem",
-                                         HTML("<h4>The ecosystem: the SIO</h4>MUHAI's Social Inequality Observatory (SIO) is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.<br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center>")
+                                         HTML("<h3>The ecosystem: Social Inequality Observatory (SIO)</h3>"),
+                                         HTML("<h4>MUHAI's SIO is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.<br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center></h4>")
                                 )
+                                ###### d) contacts and devs ####
                                 ,tabPanel("Contacts & devs",
-                                          HTML("<h4>Developers</h4>"),
+                                          HTML("<h3>Developers</h3>"),
                                           fluidRow(
                                             column(width = 3,offset = 0,
                                                    img(
@@ -855,7 +913,9 @@ HERMIONE queries dynamically the OKG through templated SPARQL queries based on u
 Please contact us by posting an issue through GitHub (<a href='https://github.com/carlosantagiustina/HERMIONE/issues'>here</a>) for any technical question or bug related to HERMIONE.
                                               ")
                                 )
-                                )))
+                                )
+                              )
+                              )
                             )
             #tab item finishes here
             )
