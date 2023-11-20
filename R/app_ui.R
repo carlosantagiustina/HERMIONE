@@ -604,10 +604,28 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             ))),
                     ###### Body item 5: methods & refs. ####
                     tabItem(tabName = "methods",
-                            fluidRow(
-                              column(
-                                width = 6,
-                                ####### PDF OKG ######
+                            fluidRow(sortable(width = 12,
+                                ####### PDF MAPPING ######
+                                box(
+                                  title = "Mapping and Exploring the Dynamics of Inequality Narratives Through
+Social Media",
+                                  closable = F,
+                                  maximizable = TRUE,
+                                  collapsible = TRUE,
+                                  width = 12,
+                                  solidHeader = T,
+                                #htmlOutput('pdfviewer'),
+                                HTML("Narratives play a relevant role in the conceptualization, identification, and comparison of social groups and in the perception of social inequalities. For example, they are used to: (i) create, manipulate and diffuse social myths (e.g., syndicalism); (ii) justify and legitimize (or question) socio-economic differences, power structures and hierarchies; (iii) identify the origins and consequences of socio-economic differences among social groups; (iv) influence social antagonisms among groups; and make specific social categories or categorization dimensions more salient.<br><br> Despite some well known biases in terms of representativeness of certain categories of the population, given their wide coverage of societal issues and their widespread diffusion, online discourse on social media platforms, such as Twitter, can be considered a viable proxy for mapping, exploring and understanding inequalitiy narratives. This is because a wide audience made up of citizens, interest group leaders, representatives, scholars and experts, advocates and activists, as well as other stakeholders are involved in these online debate arenas. <br><br>
+In addition, online discourse can serve to identify perspectives and relations among entities mentioned in the public discourse about inequality by opposing groups taking part in a debate. The resulting representations of these online narrations can be hence compared with - or integrate into - other knowledge or narrative structures, such as knowledge graphs (KG), for example Wikidata and DBpedia, and/or other types of expert opinions coming from more traditional information sources, like news broadcasters, governance bodies, or scientific articles and books by field experts and scholars. <br><br>
+To map the online inequality debate, we have developed a methodology and an interactive
+toolset, which allows users to explore, as networks, online narratives both from a
+bird’s-eye view as well as on a fine-grained perspective.<br>
+Through named entity recognition (NER) and linking (NEL), we consolidate and validate entities identified in the short texts about inequality published on Twitter during the COVID pandemic. Also, by applying a edge filtration algorithm that takes into account the relative relevance of links (i.e., edges) between entities (when having to decide which ones to keep and which ones to filter out), we can highlight interconnections between peripheral clusters of nodes whose links would otherwise be filtered out by standard filtration techniques, improving the overall informativeness and inclusiveness of our entity network representation of the online debate about inequalities. The aforementioned methodology has been first described in the following working paper:<br><br>
+-<i>Laura Spillner, Carlo R. M. A. Santagiustina, Thomas Mildner, and Robert Porzel
+(2022). Mapping and Exploring the Dynamics of Inequality Narratives Through
+Social Media.</i><br><br>"),
+                                tags$iframe(style="height:600px; width:100%", src="www/CSCW23.pdf")),
+                                ####### PDF Inequality ######
                                 box(
                                   title = "The Observatory Knowledge Graph and the The Observatory Integrated Ontology",
                                   closable = F,
@@ -615,29 +633,27 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                   collapsible = TRUE,
                                   width = 12,
                                   solidHeader = T,
-                                #htmlOutput('pdfviewer'),
-                                HTML("The Observatory Integrated Ontology (OBIO) is the result of
-these considerations integrates social media metadata with various types of linguistic
-knowledge. The Observatory Knowledge Graph (OKG) was built, following the OBIO specifications, from posts related to inequality retrieved from Twitter/X. The OKG is the backbone of a social media observatory, and its scope is to enable a deeper understanding of social media discourse about inequality. The OBIO and OKG have been first described in the following article:<br><br>
+                                  #htmlOutput('pdfviewer'),
+                                  HTML("The Observatory Integrated Ontology (OBIO) integrates social media metadata with various types of linguistic knowledge, like FCG-based frame extraction and Spacy-based NLP and NLU, among others. The Observatory Knowledge Graph (OKG) was built, following the OBIO specifications, from posts related to inequality retrieved from Twitter/X. The OKG is the backbone of a social media observatory, and its scope is to enable a deeper understanding of social media discourse about inequality. The OBIO and OKG have been first described in the following article:<br><br>
 -<i>Inès Blin, Lise Stork, Laura Spillner, and Carlo R.M.A. Santagiustina. 2023. OKG: A Knowledge Graph for Fine-grained Understanding of Social Media Discourse on Inequality. In Knowledge Capture Conference 2023 (K-CAP ’23), December 05–07, 2023, Pensacola, FL, USA. ACM, New York, NY, USA, 9 pages.</i><br><br>"),
-                                tags$iframe(style="height:600px; width:100%", src="www/kcap23-16.pdf")),
+                                  tags$iframe(style="height:600px; width:100%", src="www/kcap23-16.pdf")),
                                 ####### Entity Linking #######
                                 box(
-                                  title = "Methods 2: Entity Linking",
-                                  closable = TRUE,
+                                  title = "Entity Linking",
+                                  closable = F,
                                   maximizable = TRUE,
                                   collapsible = TRUE,
                                   width = 12,
-                                  solidHeader = FALSE,
+                                  solidHeader = T,
                                   HTML(
                                     '<!DOCTYPE html>
 <html>
 <head>
-	<title>Entity Linking to DBpedia with EntityLinker from SpaCy for Python</title>
+	<title>Entity Linking to DBpedia with EntityLinker from SpaCy</title>
 </head>
 <body>
 
-	<h1>Entity Linking to DBpedia with the EntityLinker from spaCy for Python</h1>
+	<h1>Entity Linking to DBpedia with the EntityLinker from spaCy</h1>
 
 	<p>Entity linking is the task of identifying and linking named entities in text to their corresponding entries in a knowledge base or database. DBpedia is a knowledge base that extracts structured information from Wikipedia and makes it available as a semantic web resource.</p>
 
@@ -692,39 +708,35 @@ knowledge. The Observatory Knowledge Graph (OKG) was built, following the OBIO s
 
                                   )
                                 ),
-                                ####
-                                box(
-                                  title = "Methods 2 Explanation",
-                                  closable = TRUE,
-                                  maximizable = TRUE,
-                                  collapsible = TRUE,
-                                  width = 12,
-                                  solidHeader = FALSE,
-
-                                  HTML(
-                                    '<!DOCTYPE html>
-<html>
-<head>
-	<title>Method 2 Title </title>
-</head>
-<body>
-</body>
-</html>')
-                                )
-                              ),
-                              column(
-                                width = 6,
-                                box(
-                                  title = "Methods 4 Explanation",
-                                  closable = TRUE,
-                                  maximizable = TRUE,
-                                  collapsible = TRUE,
-                                  width = 12,
-                                  solidHeader = FALSE
-                                )
-                              )
-
-                            )),
+#                                 ####
+#                                 box(
+#                                   title = "Methods 2 Explanation",
+#                                   closable = TRUE,
+#                                   maximizable = TRUE,
+#                                   collapsible = TRUE,
+#                                   width = 12,
+#                                   solidHeader = FALSE,
+#
+#                                   HTML(
+#                                     '<!DOCTYPE html>
+# <html>
+# <head>
+# 	<title>Method 2 Title </title>
+# </head>
+# <body>
+# </body>
+# </html>')
+#
+#                               ),
+#                                 box(
+#                                   title = "Methods 4 Explanation",
+#                                   closable = TRUE,
+#                                   maximizable = TRUE,
+#                                   collapsible = TRUE,
+#                                   width = 12,
+#                                   solidHeader = FALSE
+#                                 )
+                            ))),
                     ###### Body item 6: info ####
                     tabItem(tabName = "info",
                             # Boxes need to be put in a row (or column)
