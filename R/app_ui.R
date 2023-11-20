@@ -837,7 +837,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
 
                    ),
                    fluidRow(column(12, align="center",div(
-                     actionButton(label = "Reset and quit tutorial", "exit_t",width = "200"
+                     actionButton(label = "Quit and reset tutorial", "exit_t",width = "200"
                                  # ,style="margin-left: 2em"
                                   ))))
                  )))},
@@ -875,7 +875,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                 width = 12,
                 collapsed = T,
                # footer = "Advanced parameters for tweeking HERMIONE",
-                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird's-eye Network View:",value = 100, min=25, max=500,step =  25),
+                sliderInput(inputId = "slider_nentites", "Targeted Number of Entities (nodes) in Bird's-eye Network View:",value = 50, min=25, max=500,step =  25),
                sliderInput(inputId = "slider_nmaxrows", "Max Sample Size:", value = golem::get_golem_options("max_rows_sparql"),min= 100, max=golem::get_golem_options("max_rows_sparql"), step = 100)
               ),
               bs4Dash::box(
