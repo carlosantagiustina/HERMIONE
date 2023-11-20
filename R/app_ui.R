@@ -797,20 +797,64 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                          HTML("<h4>The backend: OKG & OBIO</h4>HERMIONE uses as database and back-end the Observatory Knowledge Graph, which has been deployed within the datalegend infrastructure, part of the Clariah project, hosted at TriplyDB. For details about the OKG ontology, called OBIO, refer to  <a href='https://muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html'>muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html</a><br>
 HERMIONE queries dynamically the OKG through templated SPARQL queries based on users’ inputs. ")
                                 )
-#                                 ,tabPanel("Ecosystem",
-#                                          HTML("<h4>The ecosystem: the SIO</h4>MUHAI's Social Inequality Observatory (SIO) is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.</div><br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center>")
-#                                 )
-#                                 ,tabPanel("Contacts & devs",
-#                                          HTML("<h4>Developers</h4>HERMIONE has been developed by:<br>
-#                                          <ul>
-#   <li>Carlo R. M. A. Santagiustina - Venice International University & Ca'Foscari University - <a href='mailto:carlo.santagiustina@univiu.org'>carlo.santagiustina@univiu.org</a> (lead dev.)</li>
-#   <li>Laura Spillner - University of Bremen - <a href='mailto:laura.spillner@uni-bremen.de'>laura.spillner@uni-bremen.de</a> </li>
-#   <li>Lise Stork -  Vrije Universiteit Amsterdam - <a href='mailto:l.stork@vu.nl'>l.stork@vu.nl</a>  </li>
-#   <li>Inès Blin -  Vrije Universiteit Amsterdam & Sony CSL-Paris - <a href='mailto:ines.blin@sony.com'>ines.blin@sony.com</a> </li>
-# </ul><br>
-# Please contact us through GitHub (<a href='https://github.com/carlosantagiustina/HERMIONE'>here</a>) for any technical issue, question or bug related to HERMIONE.
-#                                               ")
-#                                 )
+                                ,tabPanel("Ecosystem",
+                                         HTML("<h4>The ecosystem: the SIO</h4>MUHAI's Social Inequality Observatory (SIO) is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.<br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center>")
+                                )
+                                ,tabPanel("Contacts & devs",
+                                          HTML("<h4>Developers</h4>"),
+                                          fluidRow(
+                                            column(width = 3,offset = 0,
+                                                   img(
+                                                     src = "www/portraits/Carlo_Santagiustina.jpeg"
+                                                     ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 250px;
+                              margin-left:0%;
+                              margin-right:0%;
+                              vertical-align: middle;")
+                                                   ),
+                                            column(width = 3,offset = 0,
+                                                   img(
+                                                     src = "www/portraits/Laura_Spillner.jpeg" ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 250px;
+                              margin-left:0%;
+                              margin-right:0%;
+                              vertical-align: middle;")
+                                            ),
+                                            column(width = 3,offset = 0,
+                                                   img(
+                                                     src = "www/portraits/Ines_Blin.jpeg" ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 250px;
+                              margin-left:0%;
+                              margin-right:0%;
+                              vertical-align: middle;")
+                                            ),
+                                            column(width = 3,offset = 0,
+                                                     img(
+                                                       src = "www/portraits/Lise_Stork.jpeg" ,style = "display: block;
+                              width:100%;
+                              min-width : 150px;
+                              max-width : 250px;
+                              margin-left:0%;
+                              margin-right:0%;
+                              vertical-align: middle;")
+                                            )
+                                            ),
+                                         HTML("<br>HERMIONE has been developed by:<br>
+                                         <ul>
+  <li>Carlo R. M. A. Santagiustina - Venice International University & Ca'Foscari University - <a href='mailto:carlo.santagiustina@univiu.org'>carlo.santagiustina@univiu.org</a> (lead dev.)</li>
+  <li>Laura Spillner - University of Bremen - <a href='mailto:laura.spillner@uni-bremen.de'>laura.spillner@uni-bremen.de</a> </li>
+  <li>Lise Stork -  Vrije Universiteit Amsterdam - <a href='mailto:l.stork@vu.nl'>l.stork@vu.nl</a>  </li>
+  <li>Inès Blin -  Vrije Universiteit Amsterdam & Sony CSL-Paris - <a href='mailto:ines.blin@sony.com'>ines.blin@sony.com</a> </li>
+</ul>
+Please contact us by posting an issue through GitHub (<a href='https://github.com/carlosantagiustina/HERMIONE/issues'>here</a>) for any technical question or bug related to HERMIONE.
+                                              ")
+                                )
                                 )))
                             )
             #tab item finishes here
