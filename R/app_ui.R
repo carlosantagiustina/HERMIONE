@@ -607,91 +607,21 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             fluidRow(
                               column(
                                 width = 6,
-                                ######## STM #########
+                                ####### PDF OKG ######
                                 box(
-                                  title = "Method 1: Structural Topic Modeling",
-                                  closable = TRUE,
+                                  title = "The Observatory Knowledge Graph and the The Observatory Integrated Ontology",
+                                  closable = F,
                                   maximizable = TRUE,
                                   collapsible = TRUE,
                                   width = 12,
-                                  solidHeader = FALSE,
-                                  HTML(
-                                    '<html>
-<head>
-	<title>Structural Topic Models with the STM Library for R</title>
-</head>
-<body>
-
-	<h1>Structural Topic Models with the STM Library for R</h1>
-
-	<p>A structural topic model (STM) is a type of topic model that takes into account the underlying structure of a document collection. It is particularly useful when analyzing collections of text that have known attributes or metadata, such as author, time period, or source.</p>
-
-   <h2>Usage in the observatory</h2>
-
-  <p> We use a (seeded) structural topic model to infer how different types of inequalities are discussed in social media and to explain how these discussions change across time and among groups of users (e.g., tweets by economists and otherr inequality experts). </p>
-   <p> In addition, the features of our topic model go beyond classical bag of words approaches and include dependency relations between words and noun phrases inferred through SpaCy </p>
-
-	<h2>Installation</h2>
-
-	<p>To use the STM library for R, you first need to install it. You can do this by running the following command in R:</p>
-
-	<pre><code>install.packages("stm")</code></pre>
-
-	<h2>Creating a STM</h2>
-
-	<p>To create a STM, you need to specify the documents, the vocabulary, and the metadata. Here is an example:</p>
-
-	<pre><code># Load the STM library
-	library(stm)
-
-	# Load the data
-	data("nyt")
-
-	# Create the STM
-	stm_model <- stm(documents = nyt$documents,
-	                 vocab = nyt$vocab,
-	                 metadata = nyt$meta,
-	                 K = 10)</code></pre>
-
-	<p>In this example, we are using the `nyt` dataset that comes with the STM library. This dataset contains a collection of New York Times articles from 1987 to 2007, along with metadata such as the date and section of each article.</p>
-
-	<p>The `K` parameter specifies the number of topics to extract from the documents. In this example, we have a model with 10 topics.</p>
-
-	<h2>Viewing the Results</h2>
-
-	<p>Once you have created a STM, you can view the results using various functions provided by the STM library. Here are a few examples:</p>
-
-	<pre><code># View the topic proportions for each document
-	stm_model$theta
-
-	# View the top words for each topic
-	labelTopics(stm_model)
-
-	# Plot the topic proportions for each document
-	plot(stm_model)</code></pre>
-
-	<h2>Conclusion</h2>
-
-	<p>The STM library for R provides a powerful tool for analyzing collections of text that have known metadata. By taking into account the underlying structure of the documents, STM can provide more meaningful insights into the topics and themes present in the collection.</p>
-
-</body>
-</html>'
-                                  )
-
-                                ),
-                                box(
-                                  title = "Methods 2 Explanation",
-                                  closable = TRUE,
-                                  maximizable = TRUE,
-                                  collapsible = TRUE,
-                                  width = 12,
-                                  solidHeader = FALSE
-                                )
-                              ),
-                              column(
-                                width = 6,
+                                  solidHeader = T,
+                                #htmlOutput('pdfviewer'),
+                                HTML("The Observatory Integrated Ontology (OBIO) is the result of
+these considerations integrates social media metadata with various types of linguistic
+knowledge. The Observatory Knowledge Graph (OKG) was built, following the OBIO specifications, from posts related to inequality retrieved from Twitter/X. The OKG is the backbone of a social media observatory, and its scope is to enable a deeper understanding of social media discourse about inequality. The OBIO and OKG have been first described in the following article:<br><br>
+-<i>Inès Blin, Lise Stork, Laura Spillner, and Carlo R.M.A. Santagiustina. 2023. OKG: A Knowledge Graph for Fine-grained Understanding of Social Media Discourse on Inequality. In Knowledge Capture Conference 2023 (K-CAP ’23), December 05–07, 2023, Pensacola, FL, USA. ACM, New York, NY, USA, 9 pages.</i><br><br>"),
+                                tags$iframe(style="height:600px; width:100%", src="www/kcap23-16.pdf")),
                                 ####### Entity Linking #######
-
                                 box(
                                   title = "Methods 2: Entity Linking",
                                   closable = TRUE,
@@ -761,8 +691,29 @@ Additionally, web observatories can be used by researchers, citizens, businesses
 </html>'
 
                                   )
+                                ),
+                                ####
+                                box(
+                                  title = "Methods 2 Explanation",
+                                  closable = TRUE,
+                                  maximizable = TRUE,
+                                  collapsible = TRUE,
+                                  width = 12,
+                                  solidHeader = FALSE,
+
+                                  HTML(
+                                    '<!DOCTYPE html>
+<html>
+<head>
+	<title>Method 2 Title </title>
+</head>
+<body>
+</body>
+</html>')
                                 )
-                                ,
+                              ),
+                              column(
+                                width = 6,
                                 box(
                                   title = "Methods 4 Explanation",
                                   closable = TRUE,
@@ -793,7 +744,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 ###### a) frontend info ####
                                 tabPanel("Frontend",
                                          HTML("<h3>The frontend: HERMIONE</h3>"),
-                                         fluidRow(column(width = 5,HTML("<h4>HERMIONE, <a href='https://github.com/carlosantagiustina/HERMIONE/'>open source code on GitHub here</a>, is an interactive dashboard developed in R and Shiny. <br><br> Shiny in a R library for building UIs for data exploration and analysis performed in realtime. <br><br>  HERMIONE's interactive network visualizations have been created using Vis.js.<br><br> To standardize the dashboard and its components the <a href='https://thinkr-open.github.io/golem/'> R Golem framework</a> was used. <br><br>This framework allows to install and deploy the dashboard as if it was a R package or a Docker container.</h4>")
+                                         fluidRow(column(width = 5,HTML("<h4>HERMIONE is an interactive dashboard developed in R and Shiny. Its source code is available on GitHub at this link:<br><center><a href='https://github.com/carlosantagiustina/HERMIONE'>github.com/carlosantagiustina/HERMIONE/</a></center><br><br> <a href='https://shiny.posit.co/'>Shiny</a> in a R library for building UIs for data exploration and analysis performed in realtime. <br><br>  HERMIONE's interactive network visualizations have been created using Vis.js.<br><br> To standardize the dashboard and its components the <a href='https://thinkr-open.github.io/golem/'> R Golem framework</a> was used. <br><br>This framework allows to install and deploy the dashboard as if it was a R package or a <a href='https://www.docker.com/products/personal/'>Docker container</a>.</h4>")
                                          ),
                                            column(width = 7,
                                          bs4Carousel(
@@ -855,7 +806,14 @@ HERMIONE queries dynamically the OKG through templated SPARQL queries based on u
                                 ###### c) ecosystem ####
                                 ,tabPanel("Ecosystem",
                                          HTML("<h3>The ecosystem: Social Inequality Observatory (SIO)</h3>"),
-                                         HTML("<h4>MUHAI's SIO is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.<br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center></h4>")
+                                         tags$img(src = "www/SIO.png"
+                                                  ,style = "display: block;
+                              align:center;
+                              width:100%;
+                              min-width : 250px;
+                              max-width : 900px;
+                              vertical-align: middle;"),
+                                         HTML("<h4>MUHAI's SIO is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.<br><br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center></h4>")
                                 )
                                 ###### d) contacts and devs ####
                                 ,tabPanel("Contacts & devs",
