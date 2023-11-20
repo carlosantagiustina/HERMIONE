@@ -777,16 +777,43 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                     ###### Body item 6: info ####
                     tabItem(tabName = "info",
                             # Boxes need to be put in a row (or column)
-                            fluidRow(
-                              HTML(
-                                '<h2 class="uk-h3 uk-margin-large uk-margin-remove-bottom">        The MUHAI project introduces meaning and<br>understanding in artificial intelligence    </h2><div class="uk-panel uk-margin"><div>Responsible human-centric AI needs a way to deal with&nbsp;<strong>meaning</strong>. The MUHAI project tackles this foundational question by developing computational models of narrative construction. Creating or understanding&nbsp;<strong>narratives</strong>&nbsp;requires the integration of information coming from sensory-motor embodiment, measurement data, language, &nbsp;semantic memory, mental simulation, and&nbsp;<strong>episodic memory</strong>.&nbsp;&nbsp;</div>
-<p>MUHAI uses two domains as testbeds for the development of the required breakthroughs:&nbsp;<strong>common sense</strong>&nbsp;pragmatic knowledge about the world needed for the domain of cooking and&nbsp;<strong>social knowledge&nbsp;</strong>needed for coming up, understanding and checking data stories about inequality in society.</p>
-<p>The project relies on many existing techniques of AI ranging from <strong>deep learning networks</strong> to <strong>knowledge graphs</strong>, but will push their boundaries and develop new techniques all operating in the service of giving AI systems a better grip on meaning and thus on explanation and other key issues for achieving human-centric AI.</p>
-<p>The outcome of MUHAI is twofold. It will push the <strong>state of the art</strong> in cognitive home robotics, particularly for food production and the management of food resources, and it will provide <strong>tools</strong> for social scientists to better understand social phenomena, as for example the persistence of inequality in our society.</p>
-<p>The MUHAI project has started in October 2020 and will finish 48 months later.</p></div>
-</div>'
-                              )
-                            ))
+                            fluidRow(column(
+                              width = 12,
+                              tabBox(
+                                title = "Info & Contacts",
+                                elevation = 2,
+                                id = "tabcard_info",
+                                width = 12,
+                                collapsible = TRUE,
+                                closable = FALSE,
+                                solidHeader = TRUE,
+                                type = "tabs",
+                                status = "primary",
+                                selected = "Frontend",
+                                tabPanel("Frontend",
+                                         HTML("<h4>The frontend: HERMIONE</h4>HERMIONE, <a href='https://github.com/carlosantagiustina/HERMIONE/'>open source code on GitHub here</a>, is an interactive dashboard developed in R and Shiny. <br>Shiny in a R library for building UIs for data exploration and analysis performed in realtime. <br> HERMIONE's interactive network visualizations have been created using Vis.js.<br>To standardize the dashboard and its components the <a href='https://thinkr-open.github.io/golem/'> R Golem framework</a> was used. <br>This framework allows to install and deploy the dashboard as if it was a R package or a Docker container.")
+                                )
+                                ,tabPanel("Backend",
+                                         HTML("<h4>The backend: OKG & OBIO</h4>HERMIONE uses as database and back-end the Observatory Knowledge Graph, which has been deployed within the datalegend infrastructure, part of the Clariah project, hosted at TriplyDB. For details about the OKG ontology, called OBIO, refer to  <a href='https://muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html'>muhai-project.github.io/okg_media_discourse/ontology/obio/doc/index-en.html</a><br>
+HERMIONE queries dynamically the OKG through templated SPARQL queries based on users’ inputs. ")
+                                )
+#                                 ,tabPanel("Ecosystem",
+#                                          HTML("<h4>The ecosystem: the SIO</h4>MUHAI's Social Inequality Observatory (SIO) is a digital ecosystem of interconnected services, components and interfaces, which allow us to extract, process, explore, enrich and contextualise relations between entities and events, arguments, and other types of narrations extracted from data of different types, retrieved or extracted from a variety of sources, ranging from social media data and scientific knowledge, to general or domain-specific knowledge graphs.</div><br> More info about the SIO here:<br><center> <a href='https://dml.uni-bremen.de/muhai/'>dml.uni-bremen.de/muhai/</a></center>")
+#                                 )
+#                                 ,tabPanel("Contacts & devs",
+#                                          HTML("<h4>Developers</h4>HERMIONE has been developed by:<br>
+#                                          <ul>
+#   <li>Carlo R. M. A. Santagiustina - Venice International University & Ca'Foscari University - <a href='mailto:carlo.santagiustina@univiu.org'>carlo.santagiustina@univiu.org</a> (lead dev.)</li>
+#   <li>Laura Spillner - University of Bremen - <a href='mailto:laura.spillner@uni-bremen.de'>laura.spillner@uni-bremen.de</a> </li>
+#   <li>Lise Stork -  Vrije Universiteit Amsterdam - <a href='mailto:l.stork@vu.nl'>l.stork@vu.nl</a>  </li>
+#   <li>Inès Blin -  Vrije Universiteit Amsterdam & Sony CSL-Paris - <a href='mailto:ines.blin@sony.com'>ines.blin@sony.com</a> </li>
+# </ul><br>
+# Please contact us through GitHub (<a href='https://github.com/carlosantagiustina/HERMIONE'>here</a>) for any technical issue, question or bug related to HERMIONE.
+#                                               ")
+#                                 )
+                                )))
+                            )
+            #tab item finishes here
             )
           )
           ,
@@ -888,7 +915,7 @@ Additionally, web observatories can be used by researchers, citizens, businesses
           ),
           #### UI - FOOTER ####
           footer = bs4Dash::dashboardFooter(
-            fixed = TRUE,
+            fixed = FALSE,
             left = div(a(href = "https://www.muhai.org/",
                                               target = "_blank", "Website: MUHAI.org"),
                        br(),
