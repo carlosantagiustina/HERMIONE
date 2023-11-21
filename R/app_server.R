@@ -1075,7 +1075,7 @@ app_server <- function(input, output, session) {
   div(includeHTML(system.file("extdata","gender_inequality.html",package = "Hermione")), style = "
                    margin-right:0%;
                   display: inline-block;
-                    height:650px;
+                    height:800px;
                     width:100%;
       ")
     }

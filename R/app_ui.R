@@ -592,17 +592,18 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                            HTML(
                                              "<h3>Gender Inequality during the COVID pandemic</h3>"),
                                            HTML(
-                                             "<br>The COVID-19 pandemic has had a significant impact on gender inequality, disproportionately affecting women, both in terms of health and economic well-being.<br><br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br><br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare.<br><br>"
+                                             "<br>The COVID-19 pandemic has had a significant impact on gender inequality, disproportionately affecting women, both in terms of health and economic well-being.<br><br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br><br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br><br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare.<br><br><br><br>"
                                            ),
 
                                            ),
-                                    column(width = 9
-                                            ,htmlOutput("html_2")
+                                    column(width = 9,
+                                            #,HTML("<b>Birds-eye network</b><i>Regex filter: Gender|Women|Woman</i>"),
+                                           htmlOutput("html_2")
 
                                   )
                                 ),
                                 bs4Dash::box(
-                                  title = "Sample of Tweets about Gender inequality during the pandemic",
+                                  title = "Sample of Tweets about gender inequality during the COVID pandemic (2020)",
                                   width = 12,collapsed = F,
                                   HTML("<i>Gray square: posts from accounts that don't exist any more or posts that are hidden for privacy and GDPR compliance; Not found: posts that have been deleted by their author</i>"),
                                   div(
