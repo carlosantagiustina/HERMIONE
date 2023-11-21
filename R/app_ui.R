@@ -94,7 +94,7 @@ my_theme = fresh::create_theme(
           color = "#ffd100"
         ),
         dark = FALSE,
-        help = TRUE,
+        help = FALSE,
         #freshTheme = my_theme,
         fullscreen = TRUE,
         scrollToTop = TRUE,
@@ -488,10 +488,10 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                          uiOutput(outputId = "FG_entity_22"))
                                 ),
                                 fluidRow(
-                                  column(width = 3
-                                         # ,downloadButton('downloadNetwork',
-                                         #                label = "Download",class = "mx-2",
-                                         #                icon = shiny::icon("download"),width = "100px")
+                                  column(width = 3,
+                                         downloadButton('downloadNetwork_FG',
+                                                        label = "Download",class = "mx-2",
+                                                        icon = shiny::icon("download"),width = "100px")
                                   ),
                                   column(width = 3
                                          , actionButton(inputId = "runFG",
@@ -590,9 +590,9 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                   fluidRow(
                                     column(width = 3,
                                            HTML(
-                                             "<h3>Gender Inequality during the COVID pandemic</h3>"),
+                                             "<br><h3>Gender Inequality during the COVID pandemic</h3>"),
                                            HTML(
-                                             "<br>The COVID-19 pandemic has had a significant impact on gender inequality, disproportionately affecting women, both in terms of health and economic well-being.<br><br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br><br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br><br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare.<br><br><br><br>"
+                                             "<br><br>The COVID-19 pandemic has had a significant impact on gender inequality, disproportionately affecting women, both in terms of health and economic well-being.<br><br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br><br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br><br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare.<br><br><br><br>"
                                            ),
 
                                            ),
@@ -616,13 +616,18 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                                 uiOutput("render_tweet6_CS1")
                                 )
                                 )),
-                                fluidRow(HTML("
-                                             Report by the European Institute for Gender Equality:<br><br>
+                                fluidRow(
+                                  column(width = 2),
+                                  column(width = 9,htmlOutput("html_3")),
+                                  column(width = 1)
+                                ),
+                                fluidRow(br(),br(),HTML("
+                                            Read more about this issue in the following Report by the European Institute for Gender Equality:<br><br>
                                               <i>-Gender equality and the socio-economic impact of the COVID-19 pandemic</i>"),
                                                 tags$iframe(style="height:600px; width:100%", src="www/report-ineq.pdf")
 
-                                ),
-                                htmlOutput("html_3")
+                                )
+
                                 # ,tabPanel("Climate change & inequality",
                                 #          HTML("....")),
                                 # tabPanel(
@@ -978,8 +983,10 @@ Please contact us by posting an issue through GitHub (<a href='https://github.co
               HTML("<hr>"),
               div(style='display:inline-block',
               fluidRow(column(width = 6,HTML("<b>Step 1</b><br>"),               shiny::actionButton("sparqltaskBE", "Run/Update: Bird's-eye Network",icon = shiny::icon("map")),
-                              downloadButton("downloadFGData","Download data")),
-                       column(width = 6,HTML("<b>Step 2</b><br>"),                 shiny::actionButton("sparqltaskFG", "Run/Update: Fine Grained View",icon = shiny::icon("binoculars")))
+                              downloadButton("downloadBEData","Download BE data")),
+                       column(width = 6,HTML("<b>Step 2</b><br>"),                 shiny::actionButton("sparqltaskFG", "Run/Update: Fine Grained View",icon = shiny::icon("binoculars")),
+                              downloadButton("downloadFGData","Download FG data")
+                              )
                 ),
               #actionButton(inputId = 'run',label =  'Run',style='font-size:110%; display:center-align'),
               #actionButton(inputId = 'cancel',label =  'Cancel',style='font-size:110%; display:center-align'),

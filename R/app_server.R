@@ -1081,10 +1081,10 @@ app_server <- function(input, output, session) {
     }
   )
   output$html_3 <- renderUI({
-    div(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")), style = "
+    div(includeHTML(system.file("extdata","Gender_inequality_Pandemic.html",package = "Hermione")), style = "
                    margin-right:0%;
                   display: inline-block;
-                    height:1080px;
+                    height:800px;
                     width:100%;
       ")
   }
@@ -1586,11 +1586,19 @@ Finally, case studies can help to highlight the diversity of experiences of mult
   )
   #browser()
 
-  output$downloadFGData <- downloadHandler(
-    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_finegrained_data_HERMIONE.csv')
+  output$downloadBEData <- downloadHandler(
+    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_BE_data_HERMIONE.csv')
     ,
     content = function(file) {
       readr::write_csv(reactive_sparqlentresult()$answer_final, file)
+    }
+  )
+
+  output$downloadFGData <- downloadHandler(
+    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],FG_entity_1(),FG_entity_2(),'_FG_data_HERMIONE.csv')
+    ,
+    content = function(file) {
+      readr::write_csv(reactive_sparqlentresult_FG()$data, file)
     }
   )
 
@@ -1840,6 +1848,24 @@ Finally, case studies can help to highlight the diversity of experiences of mult
     )
     }
   )
+
+  output$downloadNetwork_FG <- downloadHandler(
+    filename = function() {
+      paste('network-', Sys.Date(),"_filter_ent1_",FG_entity_1(),"_filter_ent2_",FG_entity_2(),"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
+    },
+    content = function(con) {
+     my_net = reactive_FG_network()
+     my_net %>%
+        visNetwork::visOptions(
+                               height = "800px",#"fit-content"
+                               width = "100%",
+                               autoResize = T
+        )  %>%
+        visExport() %>%
+        visSave(con)
+    }
+  )
+
   ##### COMPONENT 3: SUMMARY STATS #####
 
   ##### COMPONENT 4: CASE STUDIES #####
