@@ -572,8 +572,8 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                             fluidRow(column(
                               width = 12,
                               tabBox(
-                                ribbon(text = "2022",
-                                       color = "pink"),
+                                # ribbon(text = "2022",
+                                #        color = "pink"),
                                 title = "Case studies",
                                 elevation = 2,
                                 id = "tabcard1",
@@ -584,24 +584,54 @@ Additionally, web observatories can be used by researchers, citizens, businesses
                                 type = "tabs",
                                 status = "primary",
                                 selected = "Gender Inequality during the COVID pandemic",
+                                ##### Gender Inequality #####
                                 tabPanel(
                                   "Gender Inequality during the COVID pandemic",
-                                  HTML(
-                                    "The COVID-19 pandemic has had a significant impact on gender inequality. The pandemic has disproportionately affected women, both in terms of their health and their economic well-being.<br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare..."
+                                  fluidRow(
+                                    column(width = 3,
+                                           HTML(
+                                             "<h3>Gender Inequality during the COVID pandemic</h3>"),
+                                           HTML(
+                                             "<br>The COVID-19 pandemic has had a significant impact on gender inequality, disproportionately affecting women, both in terms of health and economic well-being.<br><br>One of the main ways in which the pandemic has affected gender inequality is through their income and work: Women have been disproportionately affected by job losses and reduced working hours, as they are more likely to work in service sectors that have been hit hard by the pandemic, such as retail and hospitality. Additionally, in many countries women are also more likely to work in insecure, and informal work, which makes them more vulnerable to the economic impacts of the crisis.<br>Another way in which the pandemic has affected gender inequality is through the increased burden of care work. The closure of schools and other care facilities has meant that many women have had to take on additional responsibilities for the care of children and other dependents. This has made it harder for women and has also led to increased stress and fatigue.<br><br>The pandemic has also highlighted existing inequalities in healthcare. Women, especially those belonging to marginalized communities, have been disproportionately affected by the pandemic, both in terms of their health and access to healthcare.<br><br>"
+                                           ),
+
+                                           ),
+                                    column(width = 9
+                                            ,htmlOutput("html_2")
+
                                   )
-                                  ,
-                                  htmlOutput("html_2")
                                 ),
-                                tabPanel("Climate change & inequality",
-                                         HTML("....")),
-                                tabPanel(
-                                  "Racial Inequality after the murder of George Floyd",
-                                  HTML("....")
+                                bs4Dash::box(
+                                  title = "Sample of Tweets about Gender inequality during the pandemic",
+                                  width = 12,collapsed = F,
+                                  HTML("<i>Gray square: posts from accounts that don't exist any more or posts that are hidden for privacy and GDPR compliance; Not found: posts that have been deleted by their author</i>"),
+                                  div(
+                                fluidRow(
+                                                uiOutput("render_tweet1_CS1"),
+                                                uiOutput("render_tweet2_CS1"),
+                                                uiOutput("render_tweet3_CS1"),
+                                               # uiOutput("render_tweet4_CS1"),
+                                                uiOutput("render_tweet5_CS1"),
+                                                uiOutput("render_tweet6_CS1")
+                                )
+                                )),
+                                fluidRow(HTML("
+                                             Report by the European Institute for Gender Equality:<br><br>
+                                              <i>-Gender equality and the socio-economic impact of the COVID-19 pandemic</i>"),
+                                                tags$iframe(style="height:600px; width:100%", src="www/report-ineq.pdf")
+
                                 ),
-                                tabPanel("Education Inequality in the digital age",
-                                         HTML("...."))
+                                htmlOutput("html_3")
+                                # ,tabPanel("Climate change & inequality",
+                                #          HTML("....")),
+                                # tabPanel(
+                                #   "Racial Inequality after the murder of George Floyd",
+                                #   HTML("....")
+                                # ),
+                                # tabPanel("Education Inequality in the digital age",
+                                #          HTML("...."))
                               )
-                            ))),
+                            )))),
                     ###### Body item 5: methods & refs. ####
                     tabItem(tabName = "methods",
                             fluidRow(sortable(width = 12,

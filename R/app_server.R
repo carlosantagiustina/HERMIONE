@@ -1071,7 +1071,24 @@ app_server <- function(input, output, session) {
   #     }
   # )
 
-  output$html_2 <- renderUI(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")))
+  output$html_2 <- renderUI({
+  div(includeHTML(system.file("extdata","gender_inequality.html",package = "Hermione")), style = "
+                   margin-right:0%;
+                  display: inline-block;
+                    height:650px;
+                    width:100%;
+      ")
+    }
+  )
+  output$html_3 <- renderUI({
+    div(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")), style = "
+                   margin-right:0%;
+                  display: inline-block;
+                    height:1080px;
+                    width:100%;
+      ")
+  }
+  )
 
   ##### HERMIONE ####
 
@@ -1826,7 +1843,68 @@ Finally, case studies can help to highlight the diversity of experiences of mult
   ##### COMPONENT 3: SUMMARY STATS #####
 
   ##### COMPONENT 4: CASE STUDIES #####
-  ###### CASE STUDY 1: #####
+  ###### CASE STUDY 1: GENDER INEQUALITY COVID PANDEMIC #####
+  output$render_tweet1_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1277897902111756288")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet2_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1277836059657728001")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet3_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1268163038760316930")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet4_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1288195203581513728")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet5_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1280150779882606593")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+  output$render_tweet6_CS1<-   renderUI(
+    {column(width = 8,
+            tagList(
+              tags$blockquote(class = "twitter-tweet",
+                              tags$a(href =  paste0("https://twitter.com/twitter/status/","1276467918855901184")))
+              ,tags$script('twttr.widgets.load(document.getElementById("tweet"));')
+            )
+    )
+    }
+  )
+
   ###### CASE STUDY 2: #####
   ###### CASE STUDY 3: #####
   ###### CASE STUDY 4: #####
