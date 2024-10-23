@@ -30,88 +30,135 @@ initial_server_parameters <- list(
 
 #### FUNCTIONS ####
 ##### Functions for Bird's Eye View #####
-REQUEST= function(QUERY_,
-                  PREFIX_,
-                  ENDPOINT_,
-                  API_KEY_,
-                  START_DATE_,
-                  END_DATE_,
-                  ENTITY_="",
-                  TIMEOUT_=30,
-                  #RESOURCE_=RESOURCE,
-                  N_THRESHOLD_=2,
-                  N_LIMIT_=0,
-                  OFFSET_=0){
+REQUEST = function(QUERY_,PREFIX_,ENDPOINT_,API_KEY_,START_DATE_,END_DATE_,ENTITY_ = "",TIMEOUT_ = 30,N_THRESHOLD_ = 2,N_LIMIT_ = 0,OFFSET_ = 0) {
   #PASTE PREFIXES AND QUERY
-  MY_QUERY=paste0(PREFIX_,QUERY_)
+  MY_QUERY = paste0(PREFIX_, QUERY_)
 
   require(httr)
   require(tidytext)
   require(tidyverse)
 
   #SOBSTITUTE PARAMETERS IF ANY
-  if(!is.na(START_DATE_) && grepl(pattern = "[:][:]START[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+  if (!is.na(START_DATE_) &&
+      grepl(
+        pattern = "[:][:]START[_]DATE[:][:]",
+        x = QUERY_,
+        perl = T,
+        ignore.case = F
+      )) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::START_DATE::",START_DATE_,ignore.case = F,x=.)
+      gsub(
+        "::START_DATE::",
+        paste0(START_DATE_, "T00:00:00Z"),
+        ignore.case = F,
+        x = .
+      )
   }
-  if(!is.na(END_DATE_) && grepl(pattern = "[:][:]END[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+  if (!is.na(END_DATE_) &&
+      grepl(
+        pattern = "[:][:]END[_]DATE[:][:]",
+        x = QUERY_,
+        perl = T,
+        ignore.case = F
+      )) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::END_DATE::",END_DATE_,ignore.case = F,x=.)
+      gsub(
+        "::END_DATE::",
+        paste0(END_DATE_, "T00:00:00Z"),
+        ignore.case = F,
+        x = .
+      )
   }
-  if(!is.na(N_THRESHOLD_) && grepl(pattern = "[:][:]N_THRESHOLD[:][:]",x = QUERY_,perl = T,ignore.case = F)){
+  if (!is.na(N_THRESHOLD_) &&
+      grepl(
+        pattern = "[:][:]N_THRESHOLD[:][:]",
+        x = QUERY_,
+        perl = T,
+        ignore.case = F
+      )) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::N_THRESHOLD::",N_THRESHOLD_,ignore.case = F,x=.)
+      gsub("::N_THRESHOLD::",
+           N_THRESHOLD_,
+           ignore.case = F,
+           x = .)
   }
 
   print(MY_QUERY)
-  print(paste0("N_LIMIT_: ",N_LIMIT_))
-  print(paste0("OFFSET_: ",OFFSET_))
+  print(paste0("N_LIMIT_: ", N_LIMIT_))
+  print(paste0("OFFSET_: ", OFFSET_))
 
 
-  if( is.numeric(N_LIMIT_) && N_LIMIT_>0){
+  if (is.numeric(N_LIMIT_) && N_LIMIT_ > 0) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::N_LIMIT::",gsub("[.]$","",x = paste0("LIMIT ",format(N_LIMIT_, scientific = F))),ignore.case = F,x=.)
-  }else{
-    MY_QUERY = MY_QUERY %>% gsub("::N_LIMIT::","",ignore.case = F,x=.)
+      gsub(
+        "::N_LIMIT::",
+        gsub("[.]$", "", x = paste0(
+          "LIMIT ", format(N_LIMIT_, scientific = F)
+        )),
+        ignore.case = F,
+        x = .
+      )
+  } else{
+    MY_QUERY = MY_QUERY %>% gsub("::N_LIMIT::", "", ignore.case = F, x = .)
   }
 
-  if( !(is.na(ENTITY_) | ENTITY_=="")){
+  if (!(is.na(ENTITY_) | ENTITY_ == "")) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::CONTAINSENTITYFILTER::",
-           paste0('&&
-            regex(?entity2,"',gsub(" ","_",ENTITY_),'", "i")'),ignore.case = F,x=.)
+      gsub(
+        "::CONTAINSENTITYFILTER::",
+        paste0('&&
+            regex(?entity2,"', gsub(" ", "_", ENTITY_), '", "i")'),
+        ignore.case = F,
+        x = .
+      )
     MY_QUERY = MY_QUERY %>%
-      gsub("::CONTAINSENTITY::","
+      gsub(
+        "::CONTAINSENTITY::",
+        "
       ?id schema:mentions ?entityMention2 .
-    ?entity2 nif:anchorOf ?entityMention2 .",ignore.case = F,x=.)
-  }else{
-    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITYFILTER::","",ignore.case = F,x=.)
-    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITY::","",ignore.case = F,x=.)
+    ?entity2 nif:anchorOf ?entityMention2 .",
+        ignore.case = F,
+        x = .
+      )
+  } else{
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITYFILTER::",
+                                 "",
+                                 ignore.case = F,
+                                 x = .)
+    MY_QUERY = MY_QUERY %>% gsub("::CONTAINSENTITY::",
+                                 "",
+                                 ignore.case = F,
+                                 x = .)
   }
 
-  if( is.numeric(OFFSET_) && OFFSET_>0){
+  if (is.numeric(OFFSET_) && OFFSET_ > 0) {
     MY_QUERY = MY_QUERY %>%
-      gsub("::OFFSET::",gsub("[.]$","",x = paste0("\nOFFSET ",format(OFFSET_, scientific = F))),ignore.case = F,x=.)
-  }else{
-    MY_QUERY = MY_QUERY %>% gsub("::OFFSET::","",ignore.case = F,x=.)
+      gsub("::OFFSET::",
+           gsub("[.]$", "", x = paste0(
+             "\nOFFSET ", format(OFFSET_, scientific = F)
+           )),
+           ignore.case = F,
+           x = .)
+  } else{
+    MY_QUERY = MY_QUERY %>% gsub("::OFFSET::", "", ignore.case = F, x = .)
   }
 
   print(MY_QUERY)
   #RUN REQUEST
-  REQUEST=httr::GET(ENDPOINT_,timeout(TIMEOUT_),
-                    query=list("query"=MY_QUERY),
-                    add_headers(
-                      #"Accept"= "text/csv"
-                      "Accept"= "application/json"
-                      ,"Authorization" = paste('Bearer',
-                                               API_KEY_,
-                                               sep=" ")
-                    )
+  THIS_REQUEST = httr::GET(
+    ENDPOINT_,
+    timeout(TIMEOUT_),
+    query = list("query" = MY_QUERY),
+    add_headers(
+      #"Accept"= "text/csv"
+      "Accept" = "application/json"
+      ,
+      "Authorization" = paste('Bearer', API_KEY_, sep = " ")
+    )
   )
 
-  REQUEST
+  THIS_REQUEST
 }
-
 ###### Function to build Bird Eye Network ######
 build_net=function(ANSWER_=ANSWER,target_nodes,percentile=0.9,
                    power=4,filter=NA){
@@ -500,11 +547,11 @@ REQUEST_FG= function(QUERY_,
   #SOBSTITUTE PARAMETERS IF ANY
   if(!is.na(START_DATE_) && grepl(pattern = "[:][:]START[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
     MY_QUERY = MY_QUERY %>%
-      gsub("::START_DATE::",START_DATE_,ignore.case = F,x=.)
+      gsub("::START_DATE::",paste0(START_DATE_,"T00:00:00Z") ,ignore.case = F,x=.)
   }
   if(!is.na(END_DATE_) && grepl(pattern = "[:][:]END[_]DATE[:][:]",x = QUERY_,perl = T,ignore.case = F)){
     MY_QUERY = MY_QUERY %>%
-      gsub("::END_DATE::",END_DATE_,ignore.case = F,x=.)
+      gsub("::END_DATE::",paste0(END_DATE_,"T00:00:00Z"),ignore.case = F,x=.)
   }
   if(!is.na(N_THRESHOLD_) && grepl(pattern = "[:][:]N_THRESHOLD[:][:]",x = QUERY_,perl = T,ignore.case = F)){
     MY_QUERY = MY_QUERY %>%
@@ -632,7 +679,7 @@ fg_analysis=function(QUERY=QUERY_FG,
                      ENTITY_1,
                      ENTITY_2,
                      PREFIX=PREFIX_FG,
-                     API_KEY =read_file(paste0(Sys.getenv("HOME"),"/HERMIONE_KEY.txt")),
+                     API_KEY ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1bmtub3duIiwiaXNzIjoiaHR0cHM6Ly9hcGkuZHJ1aWQuZGF0YWxlZ2VuZC5uZXQiLCJqdGkiOiI4MWYwNzEzOC00YzczLTQzOTQtOWQ2ZC1jYzJmZDdkNWFhYjYiLCJ1aWQiOiI1ZmUwYWRjMDUzMGJjNjAzNDZmNjM1NDgiLCJpYXQiOjE2ODg1NjYyODN9.TcvdnPpcoISPSI-bcudUbbgr_0zjdgghNckQ_i8sJbU",
                      START_DATE,
                      END_DATE,...){
 
@@ -1081,10 +1128,10 @@ app_server <- function(input, output, session) {
     }
   )
   output$html_3 <- renderUI({
-    div(includeHTML(system.file("extdata","Gender_inequality_Pandemic.html",package = "Hermione")), style = "
+    div(includeHTML(system.file("extdata","COVID_genderinequality.html",package = "Hermione")), style = "
                    margin-right:0%;
                   display: inline-block;
-                    height:800px;
+                    height:1080px;
                     width:100%;
       ")
   }
@@ -1586,19 +1633,11 @@ Finally, case studies can help to highlight the diversity of experiences of mult
   )
   #browser()
 
-  output$downloadBEData <- downloadHandler(
-    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_BE_data_HERMIONE.csv')
+  output$downloadFGData <- downloadHandler(
+    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],ifelse(input$entityfilter!="",yes = input$entityfilter,no = ""),'_finegrained_data_HERMIONE.csv')
     ,
     content = function(file) {
       readr::write_csv(reactive_sparqlentresult()$answer_final, file)
-    }
-  )
-
-  output$downloadFGData <- downloadHandler(
-    filename =  paste0(Sys.time(),'_from', input$dateRange2[1],'_to',input$dateRange2[2],FG_entity_1(),FG_entity_2(),'_FG_data_HERMIONE.csv')
-    ,
-    content = function(file) {
-      readr::write_csv(reactive_sparqlentresult_FG()$data, file)
     }
   )
 
@@ -1848,24 +1887,6 @@ Finally, case studies can help to highlight the diversity of experiences of mult
     )
     }
   )
-
-  output$downloadNetwork_FG <- downloadHandler(
-    filename = function() {
-      paste('network-', Sys.Date(),"_filter_ent1_",FG_entity_1(),"_filter_ent2_",FG_entity_2(),"_from",input$dateRange2[1],"_to",input$dateRange2[2], '.html', sep='')
-    },
-    content = function(con) {
-     my_net = reactive_FG_network()
-     my_net %>%
-        visNetwork::visOptions(
-                               height = "800px",#"fit-content"
-                               width = "100%",
-                               autoResize = T
-        )  %>%
-        visExport() %>%
-        visSave(con)
-    }
-  )
-
   ##### COMPONENT 3: SUMMARY STATS #####
 
   ##### COMPONENT 4: CASE STUDIES #####
